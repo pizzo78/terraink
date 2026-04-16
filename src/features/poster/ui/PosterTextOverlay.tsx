@@ -106,7 +106,7 @@ export default function PosterTextOverlay({
           </p>
         </>
       )}
-
+      {/*
       <span
         className="poster-attribution"
         style={{
@@ -120,7 +120,7 @@ export default function PosterTextOverlay({
       >
         &copy; OpenStreetMap contributors
       </span>
-
+      */}
       {includeCredits && (
         <span
           className="poster-credits"
