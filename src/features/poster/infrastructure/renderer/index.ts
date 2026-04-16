@@ -26,7 +26,7 @@ export async function compositeExport(
     fontFamily,
     showPosterText = true,
     showOverlay = true,
-    includeCredits = true,
+    includeCredits = false,
     markers = [],
     markerIcons = [],
     markerProjection,

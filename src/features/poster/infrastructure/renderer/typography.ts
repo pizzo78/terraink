@@ -29,7 +29,7 @@ export function drawPosterText(
   fontFamily: string | undefined,
   showPosterText: boolean,
   showOverlay: boolean,
-  includeCredits: boolean = true,
+  includeCredits: boolean = false,
 ): void {
   const textColor = theme.ui?.text || "#111111";
   const landColor = theme.map?.land || "#808080";
