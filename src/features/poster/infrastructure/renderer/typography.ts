@@ -84,7 +84,7 @@ export function drawPosterText(
     );
     ctx.globalAlpha = 1;
   }
-
+  /*
   ctx.fillStyle = attributionColor;
   ctx.globalAlpha = attributionAlpha;
   ctx.textAlign = "right";
@@ -96,7 +96,7 @@ export function drawPosterText(
     height * (1 - TEXT_EDGE_MARGIN_RATIO),
   );
   ctx.globalAlpha = 1;
-
+*/
   if (includeCredits) {
     ctx.fillStyle = attributionColor;
     ctx.globalAlpha = attributionAlpha;
