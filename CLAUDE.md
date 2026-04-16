@@ -1,4 +1,4 @@
-# Terraink — Claude Code Guide
+# PosterEngine — Claude Code Guide
 
 ## Commands
 

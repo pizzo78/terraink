@@ -25,7 +25,7 @@ export default function SocialLinkGroup({ variant }: SocialLinkGroupProps) {
           href={repoUrl}
           target="_blank"
           rel="noreferrer"
-          aria-label="Open Terraink repository on GitHub"
+          aria-label="Open PosterEngine repository on GitHub"
           title="GitHub repository"
         >
           <GitHubIcon />
@@ -41,7 +41,7 @@ export default function SocialLinkGroup({ variant }: SocialLinkGroupProps) {
           href={instagramUrl}
           target="_blank"
           rel="noreferrer"
-          aria-label="Follow Terraink on Instagram"
+          aria-label="Follow PosterEngine on Instagram"
           title="Instagram"
         >
           <InstagramIcon />
@@ -53,7 +53,7 @@ export default function SocialLinkGroup({ variant }: SocialLinkGroupProps) {
           href={kofiUrl}
           target="_blank"
           rel="noreferrer"
-          aria-label="Support Terraink on Ko-fi"
+          aria-label="Support PosterEngine on Ko-fi"
           title="Ko-fi"
         >
           <KofiIcon />

@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "terraink",
+      "name": "posterengine",
       "dependencies": {
         "maplibre-gl": "^5.19.0",
         "react": "^18.3.1",
