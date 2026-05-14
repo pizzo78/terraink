@@ -48,6 +48,7 @@ function createSharedPosterPayload(state: PosterState): SharedPosterPayload {
     },
     customColors: state.customColors,
     markerDefaults: state.markerDefaults,
+    exportSettings: state.exportSettings,
     markers: buildShareableMarkers(state),
   };
 }

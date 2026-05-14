@@ -39,10 +39,19 @@ export interface SharedMarkerDefaults {
   color?: string;
 }
 
+export interface SharedExportSettings {
+  dpi?: 150 | 300 | 600;
+  marginMm?: number;
+  bleedMm?: number;
+  safeAreaMm?: number;
+  cropMarks?: boolean;
+}
+
 export interface SharedPosterPayload {
   version: 1;
   form?: SharedPosterForm;
   customColors?: Record<string, string>;
   markerDefaults?: SharedMarkerDefaults;
+  exportSettings?: SharedExportSettings;
   markers?: SharedMarker[];
 }

@@ -16,7 +16,7 @@
 }
 
 .export-modal {
-  width: min(100%, 360px);
+  width: min(100%, 390px);
   border: 1px solid var(--line);
   border-radius: 14px;
   background: rgba(9, 18, 27, 0.98);
@@ -63,6 +63,119 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+}
+
+.export-modal-print-panel {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(146, 176, 200, 0.2);
+  border-radius: 10px;
+  background: rgba(10, 20, 31, 0.7);
+}
+
+.export-modal-dpi-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.export-modal-dpi-btn {
+  min-height: 40px;
+  border: 1px solid rgba(146, 176, 200, 0.2);
+  border-radius: 8px;
+  background: rgba(17, 33, 47, 0.78);
+  color: rgba(218, 238, 250, 0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: "Spline Sans Mono", monospace;
+}
+
+.export-modal-dpi-btn span {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.export-modal-dpi-btn small {
+  font-size: 0.62rem;
+  font-weight: 700;
+  opacity: 0.72;
+}
+
+.export-modal-dpi-btn.is-active {
+  background: rgba(231, 242, 250, 0.96);
+  border-color: rgba(165, 198, 221, 0.38);
+  color: #0d1f2e;
+}
+
+.export-modal-print-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.export-modal-print-field,
+.export-modal-crop-field {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid rgba(146, 176, 200, 0.18);
+  border-radius: 8px;
+  background: rgba(17, 33, 47, 0.62);
+  color: rgba(218, 238, 250, 0.9);
+  font-family: "Spline Sans Mono", monospace;
+}
+
+.export-modal-print-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 4px;
+  align-items: center;
+  padding: 6px;
+}
+
+.export-modal-print-field span {
+  grid-column: 1 / -1;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  opacity: 0.74;
+}
+
+.export-modal-print-field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  outline: none;
+}
+
+.export-modal-print-field small {
+  font-size: 0.58rem;
+  opacity: 0.64;
+}
+
+.export-modal-crop-field {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.export-modal-crop-field input {
+  width: 14px;
+  height: 14px;
+  accent-color: #e7f2fa;
 }
 
 .export-modal-support-label {

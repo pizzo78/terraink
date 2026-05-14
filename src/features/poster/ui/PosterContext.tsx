@@ -42,6 +42,7 @@ import {
   DEFAULT_LON,
 } from "@/core/config";
 import { readPosterSharePayload } from "@/core/services";
+import { DEFAULT_EXPORT_SETTINGS } from "@/features/export/domain/types";
 
 const defaultLayoutOption = getLayoutOption(defaultLayoutId);
 const defaultLayoutWidthCm = Number(
@@ -90,6 +91,7 @@ const INITIAL_STATE: PosterState = {
     ...createDefaultMarkerSettings(),
     color: getTheme(defaultThemeName).ui.text,
   },
+  exportSettings: DEFAULT_EXPORT_SETTINGS,
   isMarkerEditorActive: false,
   activeMarkerId: null,
   error: "",

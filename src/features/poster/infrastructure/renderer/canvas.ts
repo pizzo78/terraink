@@ -1,19 +1,29 @@
 import { MAX_PIXELS, MAX_SIDE, OUTPUT_DPI } from "./constants";
 import type { CanvasSize } from "../../domain/types";
 
+interface ResolveCanvasSizeOptions {
+  outputDpi?: number;
+  maxPixels?: number;
+  maxSide?: number;
+}
+
 export function resolveCanvasSize(
   widthInches: number,
   heightInches: number,
+  options: ResolveCanvasSizeOptions = {},
 ): CanvasSize {
-  const requestedWidth = Math.max(600, Math.round(widthInches * OUTPUT_DPI));
-  const requestedHeight = Math.max(600, Math.round(heightInches * OUTPUT_DPI));
+  const outputDpi = normalizePositiveNumber(options.outputDpi, OUTPUT_DPI);
+  const maxPixels = normalizePositiveNumber(options.maxPixels, MAX_PIXELS);
+  const maxSide = normalizePositiveNumber(options.maxSide, MAX_SIDE);
+  const requestedWidth = Math.max(600, Math.round(widthInches * outputDpi));
+  const requestedHeight = Math.max(600, Math.round(heightInches * outputDpi));
   const totalPixels = requestedWidth * requestedHeight;
 
   const areaFactor =
-    totalPixels > MAX_PIXELS ? Math.sqrt(MAX_PIXELS / totalPixels) : 1;
+    totalPixels > maxPixels ? Math.sqrt(maxPixels / totalPixels) : 1;
   const sideFactor =
-    Math.max(requestedWidth, requestedHeight) > MAX_SIDE
-      ? MAX_SIDE / Math.max(requestedWidth, requestedHeight)
+    Math.max(requestedWidth, requestedHeight) > maxSide
+      ? maxSide / Math.max(requestedWidth, requestedHeight)
       : 1;
 
   const factor = Math.min(areaFactor, sideFactor, 1);
@@ -27,4 +37,9 @@ export function resolveCanvasSize(
     requestedHeight,
     downscaleFactor: factor,
   };
+}
+
+function normalizePositiveNumber(value: unknown, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }

@@ -1,6 +1,10 @@
 import { useCallback } from "react";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
-import type { ExportFormat } from "@/features/export/domain/types";
+import {
+  normalizeExportSettings,
+  type ExportFormat,
+  type ExportSettings,
+} from "@/features/export/domain/types";
 import {
   captureMapAsCanvas,
   compositeExport,
@@ -44,6 +48,7 @@ export function useExport() {
   const { state, dispatch, effectiveTheme, mapRef } = usePosterContext();
   const { form } = state;
   const hasVisibleMarkers = form.showMarkers && state.markers.length > 0;
+  const exportSettings = normalizeExportSettings(state.exportSettings);
 
   const registerSuccessfulExport = useCallback(() => {
     const nextCount = readPosterExportCount() + 1;
@@ -63,7 +68,10 @@ export function useExport() {
   }, []);
 
   const exportPoster = useCallback(
-    async (format: ExportFormat) => {
+    async (
+      format: ExportFormat,
+      settingsOverride?: Partial<ExportSettings>,
+    ) => {
       const map = mapRef.current;
       if (!map) {
         dispatch({ type: "SET_ERROR", error: "Map is not ready." });
@@ -73,6 +81,11 @@ export function useExport() {
       dispatch({ type: "SET_EXPORT_STATUS", exporting: true });
 
       try {
+        const settings = normalizeExportSettings({
+          ...exportSettings,
+          ...settingsOverride,
+        });
+
         // Ensure font is loaded before compositing text
         if (form.showPosterText && form.fontFamily.trim()) {
           await ensureGoogleFont(form.fontFamily.trim());
@@ -80,11 +93,20 @@ export function useExport() {
 
         const widthCm = Number(form.width) || DEFAULT_POSTER_WIDTH_CM;
         const heightCm = Number(form.height) || DEFAULT_POSTER_HEIGHT_CM;
-        const dpi = 300;
         const widthInches = widthCm / CM_PER_INCH;
         const heightInches = heightCm / CM_PER_INCH;
 
-        const size = resolveCanvasSize(widthInches, heightInches);
+        const size = resolveCanvasSize(widthInches, heightInches, {
+          outputDpi: settings.dpi,
+          maxPixels:
+            settings.dpi === 600
+              ? 32_000_000
+              : settings.dpi === 300
+                ? 12_000_000
+                : 5_000_000,
+          maxSide:
+            settings.dpi === 600 ? 8192 : settings.dpi === 300 ? 5200 : 3600,
+        });
 
         const lat = Number(form.latitude) || 0;
         const lon = Number(form.longitude) || 0;
@@ -160,10 +182,14 @@ export function useExport() {
           const pdfBlob = createPdfBlobFromCanvas(canvas, {
             widthCm,
             heightCm,
+            marginMm: settings.marginMm,
+            bleedMm: settings.bleedMm,
+            safeAreaMm: settings.safeAreaMm,
+            cropMarks: settings.cropMarks,
           });
           await triggerDownloadBlob(pdfBlob, filename);
         } else {
-          const pngBlob = await createPngBlob(canvas, dpi);
+          const pngBlob = await createPngBlob(canvas, settings.dpi);
           await triggerDownloadBlob(pngBlob, filename);
         }
 
@@ -178,6 +204,7 @@ export function useExport() {
       mapRef,
       form,
       effectiveTheme,
+      exportSettings,
       dispatch,
       hasVisibleMarkers,
       registerSuccessfulExport,
@@ -203,6 +230,9 @@ export function useExport() {
 
   return {
     isExporting: state.isExporting,
+    exportSettings,
+    setExportSettings: (settings: Partial<ExportSettings>) =>
+      dispatch({ type: "SET_EXPORT_SETTINGS", settings }),
     exportPoster,
     handleDownloadPng,
     handleDownloadPdf,

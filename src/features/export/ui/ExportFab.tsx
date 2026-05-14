@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useExport } from "@/features/export/application/useExport";
 import { usePosterShareLink } from "@/features/share/application/usePosterShareLink";
-import type { ExportFormat } from "@/features/export/domain/types";
+import {
+  EXPORT_DPI_OPTIONS,
+  type ExportDpi,
+  type ExportFormat,
+} from "@/features/export/domain/types";
 import { CloseIcon, DownloadIcon, LinkIcon, LoaderIcon } from "@/shared/ui/Icons";
 import SocialLinkGroup from "@/shared/ui/SocialLinkGroup";
 
@@ -16,7 +20,8 @@ interface ExportFabProps {
 }
 
 export default function ExportFab({ isMobile }: ExportFabProps) {
-  const { isExporting, exportPoster } = useExport();
+  const { isExporting, exportPoster, exportSettings, setExportSettings } =
+    useExport();
   const { status: shareStatus, copyShareLink } = usePosterShareLink();
   const [isOpen, setIsOpen] = useState(false);
   const [activeFormat, setActiveFormat] = useState<ExportFormat | null>(null);
@@ -54,6 +59,22 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
   const runExport = (format: ExportFormat) => {
     setActiveFormat(format);
     void exportPoster(format);
+  };
+
+  const updatePrintNumber = (
+    key: "marginMm" | "bleedMm" | "safeAreaMm",
+    value: string,
+  ) => {
+    const nextValue = Number(value);
+    if (key === "marginMm") {
+      setExportSettings({ marginMm: nextValue });
+      return;
+    }
+    if (key === "bleedMm") {
+      setExportSettings({ bleedMm: nextValue });
+      return;
+    }
+    setExportSettings({ safeAreaMm: nextValue });
   };
 
   const triggerClass = isMobile
@@ -100,6 +121,85 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
               </button>
             </div>
             <div className="export-modal-actions">
+              <div className="export-modal-print-panel">
+                <div className="export-modal-dpi-group" role="group" aria-label="DPI">
+                  {EXPORT_DPI_OPTIONS.map((dpi) => (
+                    <button
+                      key={dpi}
+                      type="button"
+                      className={`export-modal-dpi-btn${
+                        exportSettings.dpi === dpi ? " is-active" : ""
+                      }`}
+                      aria-pressed={exportSettings.dpi === dpi}
+                      onClick={() =>
+                        setExportSettings({ dpi: dpi as ExportDpi })
+                      }
+                      disabled={isExporting}
+                    >
+                      <span>{dpi}</span>
+                      <small>DPI</small>
+                    </button>
+                  ))}
+                </div>
+                <div className="export-modal-print-grid">
+                  <label className="export-modal-print-field">
+                    <span>Margin</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="30"
+                      step="0.5"
+                      value={exportSettings.marginMm}
+                      onChange={(event) =>
+                        updatePrintNumber("marginMm", event.target.value)
+                      }
+                      disabled={isExporting}
+                    />
+                    <small>mm</small>
+                  </label>
+                  <label className="export-modal-print-field">
+                    <span>Bleed</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="0.5"
+                      value={exportSettings.bleedMm}
+                      onChange={(event) =>
+                        updatePrintNumber("bleedMm", event.target.value)
+                      }
+                      disabled={isExporting}
+                    />
+                    <small>mm</small>
+                  </label>
+                  <label className="export-modal-print-field">
+                    <span>Safe</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="30"
+                      step="0.5"
+                      value={exportSettings.safeAreaMm}
+                      onChange={(event) =>
+                        updatePrintNumber("safeAreaMm", event.target.value)
+                      }
+                      disabled={isExporting}
+                    />
+                    <small>mm</small>
+                  </label>
+                  <label className="export-modal-crop-field">
+                    <input
+                      type="checkbox"
+                      checked={exportSettings.cropMarks}
+                      onChange={(event) =>
+                        setExportSettings({ cropMarks: event.target.checked })
+                      }
+                      disabled={isExporting}
+                    />
+                    <span>Crop</span>
+                  </label>
+                </div>
+              </div>
               <button
                 type="button"
                 className={`export-modal-option export-modal-option--share${

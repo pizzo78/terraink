@@ -13,6 +13,10 @@ import {
   featuredMarkerIcons,
   predefinedMarkerIcons,
 } from "@/features/markers/infrastructure/iconRegistry";
+import {
+  normalizeExportSettings,
+  type ExportSettings,
+} from "@/features/export/domain/types";
 import { clamp } from "@/shared/geo/math";
 import { DISPLAY_PALETTE_KEYS } from "@/features/theme/domain/types";
 import type { SharedPosterPayload } from "@/features/share/domain/types";
@@ -88,6 +92,7 @@ export interface PosterState {
   markers: MarkerItem[];
   customMarkerIcons: MarkerIconDefinition[];
   markerDefaults: MarkerDefaults;
+  exportSettings: ExportSettings;
   isMarkerEditorActive: boolean;
   activeMarkerId: string | null;
   error: string;
@@ -135,7 +140,8 @@ export type PosterAction =
       defaults: Partial<MarkerDefaults>;
       applyToMarkers?: boolean;
     }
-  | { type: "RESET_MARKER_DEFAULTS" };
+  | { type: "RESET_MARKER_DEFAULTS" }
+  | { type: "SET_EXPORT_SETTINGS"; settings: Partial<ExportSettings> };
 
 /* ────── Reducer ────── */
 
@@ -404,6 +410,15 @@ export function posterReducer(
       };
     }
 
+    case "SET_EXPORT_SETTINGS":
+      return {
+        ...state,
+        exportSettings: normalizeExportSettings({
+          ...state.exportSettings,
+          ...action.settings,
+        }),
+      };
+
     default:
       return state;
   }
@@ -493,7 +508,7 @@ export function restoreSharedPosterState(
             return null;
           }
 
-          const sharedMarker = marker as Record<string, unknown>;
+          const sharedMarker = marker as unknown as Record<string, unknown>;
           const lat = Number(sharedMarker.lat);
           const lon = Number(sharedMarker.lon);
           if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
@@ -525,6 +540,7 @@ export function restoreSharedPosterState(
     },
     customColors: normalizeSharedColors(payload.customColors),
     markerDefaults,
+    exportSettings: normalizeExportSettings(payload.exportSettings),
     markers,
     customMarkerIcons: [],
     isMarkerEditorActive: false,

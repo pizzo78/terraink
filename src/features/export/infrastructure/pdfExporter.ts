@@ -1,5 +1,8 @@
 import type { ExportOptions } from "../domain/types";
 
+const PT_PER_MM = 72 / 25.4;
+const MM_PER_CM = 10;
+
 function base64ToBytes(base64: string): Uint8Array {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -14,9 +17,58 @@ function normalizePositiveNumber(value: number, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function normalizeNonNegativeNumber(value: unknown, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+function mmToPt(valueMm: number): number {
+  return valueMm * PT_PER_MM;
+}
+
+function cmToPt(valueCm: number): number {
+  return mmToPt(valueCm * MM_PER_CM);
+}
+
 function formatPdfNumber(value: number): string {
   const rounded = Number(value.toFixed(3));
   return Number.isInteger(rounded) ? String(rounded) : String(rounded);
+}
+
+function formatPdfBox(
+  left: number,
+  bottom: number,
+  right: number,
+  top: number,
+): string {
+  return `[${formatPdfNumber(left)} ${formatPdfNumber(bottom)} ${formatPdfNumber(right)} ${formatPdfNumber(top)}]`;
+}
+
+function buildCropMarkCommands(options: {
+  trimLeft: number;
+  trimBottom: number;
+  trimRight: number;
+  trimTop: number;
+}): string[] {
+  const markLength = mmToPt(5);
+  const markGap = mmToPt(2);
+  const { trimLeft, trimBottom, trimRight, trimTop } = options;
+  const commands = [
+    "q",
+    "0 0 0 RG",
+    "0.35 w",
+    `${formatPdfNumber(trimLeft - markGap - markLength)} ${formatPdfNumber(trimBottom)} m ${formatPdfNumber(trimLeft - markGap)} ${formatPdfNumber(trimBottom)} l`,
+    `${formatPdfNumber(trimLeft)} ${formatPdfNumber(trimBottom - markGap - markLength)} m ${formatPdfNumber(trimLeft)} ${formatPdfNumber(trimBottom - markGap)} l`,
+    `${formatPdfNumber(trimRight + markGap)} ${formatPdfNumber(trimBottom)} m ${formatPdfNumber(trimRight + markGap + markLength)} ${formatPdfNumber(trimBottom)} l`,
+    `${formatPdfNumber(trimRight)} ${formatPdfNumber(trimBottom - markGap - markLength)} m ${formatPdfNumber(trimRight)} ${formatPdfNumber(trimBottom - markGap)} l`,
+    `${formatPdfNumber(trimLeft - markGap - markLength)} ${formatPdfNumber(trimTop)} m ${formatPdfNumber(trimLeft - markGap)} ${formatPdfNumber(trimTop)} l`,
+    `${formatPdfNumber(trimLeft)} ${formatPdfNumber(trimTop + markGap)} m ${formatPdfNumber(trimLeft)} ${formatPdfNumber(trimTop + markGap + markLength)} l`,
+    `${formatPdfNumber(trimRight + markGap)} ${formatPdfNumber(trimTop)} m ${formatPdfNumber(trimRight + markGap + markLength)} ${formatPdfNumber(trimTop)} l`,
+    `${formatPdfNumber(trimRight)} ${formatPdfNumber(trimTop + markGap)} m ${formatPdfNumber(trimRight)} ${formatPdfNumber(trimTop + markGap + markLength)} l`,
+    "S",
+    "Q",
+  ];
+  return commands;
 }
 
 export function createPdfBlobFromCanvas(
@@ -27,8 +79,40 @@ export function createPdfBlobFromCanvas(
   const imageHeight = Math.max(1, Math.round(Number(canvas?.height) || 1));
   const widthCm = normalizePositiveNumber(options.widthCm ?? 20, 20);
   const heightCm = normalizePositiveNumber(options.heightCm ?? 30, 30);
-  const pageWidthPt = (widthCm / 2.54) * 72;
-  const pageHeightPt = (heightCm / 2.54) * 72;
+  const marginMm = normalizeNonNegativeNumber(options.marginMm, 0);
+  const bleedMm = normalizeNonNegativeNumber(options.bleedMm, 0);
+  const safeAreaMm = normalizeNonNegativeNumber(options.safeAreaMm, 0);
+  const cropMarks = options.cropMarks ?? false;
+  const markMarginMm = cropMarks ? 8 : 0;
+
+  const posterWidthPt = cmToPt(widthCm);
+  const posterHeightPt = cmToPt(heightCm);
+  const marginPt = mmToPt(marginMm);
+  const bleedPt = mmToPt(bleedMm);
+  const safeAreaPt = mmToPt(safeAreaMm);
+  const markMarginPt = mmToPt(markMarginMm);
+  const trimWidthPt = posterWidthPt + marginPt * 2;
+  const trimHeightPt = posterHeightPt + marginPt * 2;
+  const pageInsetPt = bleedPt + markMarginPt;
+  const pageWidthPt = trimWidthPt + pageInsetPt * 2;
+  const pageHeightPt = trimHeightPt + pageInsetPt * 2;
+  const trimLeft = pageInsetPt;
+  const trimBottom = pageInsetPt;
+  const trimRight = trimLeft + trimWidthPt;
+  const trimTop = trimBottom + trimHeightPt;
+  const bleedLeft = markMarginPt;
+  const bleedBottom = markMarginPt;
+  const bleedRight = pageWidthPt - markMarginPt;
+  const bleedTop = pageHeightPt - markMarginPt;
+  const artLeft = Math.min(trimRight, trimLeft + marginPt + safeAreaPt);
+  const artBottom = Math.min(trimTop, trimBottom + marginPt + safeAreaPt);
+  const artRight = Math.max(artLeft, trimRight - marginPt - safeAreaPt);
+  const artTop = Math.max(artBottom, trimTop - marginPt - safeAreaPt);
+  const drawFullBleed = bleedMm > 0 && marginMm === 0;
+  const imageX = drawFullBleed ? bleedLeft : trimLeft + marginPt;
+  const imageY = drawFullBleed ? bleedBottom : trimBottom + marginPt;
+  const imageDrawWidth = drawFullBleed ? bleedRight - bleedLeft : posterWidthPt;
+  const imageDrawHeight = drawFullBleed ? bleedTop - bleedBottom : posterHeightPt;
 
   const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.94);
   const base64 = jpegDataUrl.split(",")[1] || "";
@@ -36,9 +120,16 @@ export function createPdfBlobFromCanvas(
 
   const contentStream = [
     "q",
-    `${formatPdfNumber(pageWidthPt)} 0 0 ${formatPdfNumber(pageHeightPt)} 0 0 cm`,
+    "1 1 1 rg",
+    `0 0 ${formatPdfNumber(pageWidthPt)} ${formatPdfNumber(pageHeightPt)} re f`,
+    "Q",
+    "q",
+    `${formatPdfNumber(imageDrawWidth)} 0 0 ${formatPdfNumber(imageDrawHeight)} ${formatPdfNumber(imageX)} ${formatPdfNumber(imageY)} cm`,
     "/Im0 Do",
     "Q",
+    ...(cropMarks
+      ? buildCropMarkCommands({ trimLeft, trimBottom, trimRight, trimTop })
+      : []),
   ].join("\n");
 
   const encoder = new TextEncoder();
@@ -75,7 +166,7 @@ export function createPdfBlobFromCanvas(
   writeObject(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
   writeObject(
     3,
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${formatPdfNumber(pageWidthPt)} ${formatPdfNumber(pageHeightPt)}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`,
+    `<< /Type /Page /Parent 2 0 R /MediaBox ${formatPdfBox(0, 0, pageWidthPt, pageHeightPt)} /TrimBox ${formatPdfBox(trimLeft, trimBottom, trimRight, trimTop)} /BleedBox ${formatPdfBox(bleedLeft, bleedBottom, bleedRight, bleedTop)} /ArtBox ${formatPdfBox(artLeft, artBottom, artRight, artTop)} /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`,
   );
   writeObject(
     4,
