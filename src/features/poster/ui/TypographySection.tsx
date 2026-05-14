@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { ensureGoogleFont } from "@/core/services";
 import type { PosterForm } from "@/features/poster/application/posterReducer";
 import type { FontOption } from "@/core/config";
 import {
@@ -21,14 +19,6 @@ export default function TypographySection({
   onChange,
   fontOptions,
 }: TypographySectionProps) {
-  useEffect(() => {
-    const families = fontOptions
-      .map((option) => String(option.value || "").trim())
-      .filter(Boolean);
-
-    void Promise.allSettled(families.map((family) => ensureGoogleFont(family)));
-  }, [fontOptions]);
-
   return (
     <>
       <section className="panel-block">

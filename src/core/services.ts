@@ -1,42 +1,43 @@
 /**
  * Pre-instantiated infrastructure services.
  *
- * This module creates singleton instances of the hexagonal adapters,
- * wiring them to the concrete cache and HTTP implementations.
- * Application hooks import from here instead of calling factories directly.
+ * Application hooks import from this module instead of calling concrete
+ * adapters or browser APIs directly.
  */
 
 import { localStorageCache } from "@/core/cache/localStorageCache";
 import { fetchAdapter } from "@/core/http/fetchAdapter";
 import { googleFontsAdapter } from "@/core/fonts/googleFontsAdapter";
 import { createNominatimAdapter } from "@/features/location/infrastructure/nominatimAdapter";
-
-/* ── Location / Geocoding ── */
+import { createUpdateRepository } from "@/features/updates/infrastructure/updateRepository";
 
 const nominatim = createNominatimAdapter(fetchAdapter, localStorageCache);
+const updates = createUpdateRepository(fetchAdapter);
 
 export const searchLocations = nominatim.searchLocations;
 export const geocodeLocation = nominatim.geocodeLocation;
 export const reverseGeocodeCoordinates = nominatim.reverseGeocode;
 
-/* ── Fonts ── */
+export const loadUpdateVersions = updates.loadUpdateVersions;
+export const readLastSeenUpdateVersion = updates.readLastSeenUpdateVersion;
+export const writeLastSeenUpdateVersion = updates.writeLastSeenUpdateVersion;
+export const resolveUpdateImagePath = updates.resolveUpdateImagePath;
 
 export const ensureGoogleFont =
   googleFontsAdapter.ensureFont.bind(googleFontsAdapter);
 
-/* ── Poster compositing ── */
-
 export { compositeExport } from "@/features/poster/infrastructure/renderer";
-
-/* ── Export helpers ── */
+export { resolveCanvasSize } from "@/features/poster/infrastructure/renderer/canvas";
 
 export { captureMapAsCanvas } from "@/features/export/infrastructure/mapExporter";
 
 export { createPngBlob } from "@/features/export/infrastructure/pngExporter";
 export { createLayeredSvgBlobFromMap } from "@/features/export/infrastructure/layeredSvgExporter";
-
 export { createPdfBlobFromCanvas } from "@/features/export/infrastructure/pdfExporter";
-
 export { createPosterFilename } from "@/features/export/infrastructure/filenameGenerator";
-
+export {
+  readPosterExportCount,
+  writePosterExportCount,
+} from "@/features/export/infrastructure/exportCountStorage";
 export { triggerDownloadBlob } from "@/features/export/infrastructure/fileDownloader";
+export { getAllMarkerIcons } from "@/features/markers/infrastructure/iconRegistry";

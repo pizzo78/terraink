@@ -3,7 +3,7 @@ import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { useFormHandlers } from "@/features/poster/application/useFormHandlers";
 import { useLocationAutocomplete } from "@/features/location/application/useLocationAutocomplete";
 import { useCurrentLocation } from "@/features/location/application/useCurrentLocation";
-import { useMapSync } from "@/features/map/application/useMapSync";
+import { useMapFlyTo } from "@/features/map/application/useMapFlyTo";
 import type { MobileTab } from "@/shared/ui/MobileNavBar";
 
 import LocationSection from "@/features/location/ui/LocationSection";
@@ -56,7 +56,7 @@ export default function SettingsPanel({
 }: {
   mobileTab?: MobileTab;
 }) {
-  const { state, dispatch, mapRef, selectedTheme } = usePosterContext();
+  const { state, mapRef, selectedTheme } = usePosterContext();
   const {
     handleChange,
     handleNumericFieldBlur,
@@ -73,7 +73,7 @@ export default function SettingsPanel({
     state.form.location,
     state.isLocationFocused,
   );
-  const { flyToLocation } = useMapSync(state, dispatch, mapRef);
+  const flyToLocation = useMapFlyTo(state.form.distance, mapRef);
   const { handleUseCurrentLocation, isLocatingUser, locationPermissionMessage } =
     useCurrentLocation(flyToLocation);
 

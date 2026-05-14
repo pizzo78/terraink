@@ -1,153 +1,63 @@
-# Contributing to Terraink
+# Contributing to PosterEngine
 
-Thanks for your interest in contributing. This guide explains the required workflow and the engineering standards used in this repository.
-
-These requirements exist to keep the codebase coherent, extensible, and maintainable as the project grows. The goal is not extra process, but contributions that are easy to review, safe to build on, and consistent with the long-term architecture.
+This guide keeps contributions focused, reviewable, and consistent with the app architecture.
 
 ## Getting Started
 
-### 1. Clone and install
-
 ```bash
-git clone https://github.com/yousifamanuel/terraink.git
+git clone https://github.com/pizzo78/terraink.git
 cd terraink
-bun install
-```
-
-### 2. Optional: configure environment variables
-
-```bash
-cp .env.example .env
-```
-
-Environment variables are optional for local development. Check [`.env.example`](./.env.example) for the available entries.
-
-### 3. Start the development server
-
-```bash
 bun install
 bun run dev
 ```
 
-The app will be available at `http://localhost:5173`.
+The app runs at `http://localhost:5173`.
 
-## Environment Variables
-
-Environment variables are documented in [`.env.example`](./.env.example).
-
-- They are optional for most local work.
-- For testing, they must not be set unless a specific test case explicitly requires them.
-- Do not assume environment values are present for core functionality.
-- Access environment values only through `src/core/config.ts`.
+Environment variables are optional for local development. Check [`.env.example`](./.env.example) for available entries. Do not assume environment values are present for core functionality, and access `VITE_*` values only through `src/core/config.ts`.
 
 ## Branch Strategy
 
-The repository follows a linear promotion model:
+The intended promotion model is:
 
 ```text
 dev -> beta -> main
 ```
 
-| Branch | Purpose                                                                                                       |
-| ------ | ------------------------------------------------------------------------------------------------------------- |
-| `dev`  | Active development. All feature branches are created from here and all external PRs target this branch first. |
-| `beta` | Staging or pre-release testing. Changes are promoted here from `dev` when they are ready for broader testing. |
-| `main` | Production. Changes reach this branch only after they were verified in `beta`.                                |
-
-Always branch from `dev` and always open your pull request against `dev`.
-
-Pull requests must not target `main` directly. PRs opened against `main` will be redirected or closed.
+When `dev` is available, create feature branches from `dev` and target pull requests back to `dev`. Do not open production changes directly against `main`.
 
 ## Contribution Flow
 
-1. Pick an existing issue, or open a new issue first to discuss the bug or feature.
-2. Create a branch from `dev` with a short descriptive name such as `fix/geocoding-error` or `feat/svg-export`.
-3. Implement the change in a focused, minimal diff.
-4. Run `bun install`.
-5. Run `bun run build` and verify the build passes before opening a PR.
-6. Open a pull request against `dev` and fill out the pull request template completely.
-7. Add screenshots for visible UI changes.
-8. Wait for maintainer review. Do not merge your own PR.
-
-## Pull Request Requirements
-
-Before requesting review, make sure your PR satisfies all of the following:
-
-- The PR targets `dev`, never `main`.
-- The PR description clearly explains what changed, why it changed, and any known limitations.
-- UI contributions include screenshots or a short demo of the final behavior.
-
-Maintainers may close PRs that target the wrong branch, do not follow the agreed feature scope, or do not meet the engineering standards below.
-
-## Commit Messages
-
-Follow the emoji-style Conventional Commits format used in this repo. See [`.vscode/commit-instructions.md`](./.vscode/commit-instructions.md) for the full reference.
-
-```text
-<emoji> <type>(<scope>): <subject>
-```
-
-Common types:
-
-| Emoji | Type       | When to use                              |
-| ----- | ---------- | ---------------------------------------- |
-| `✨`  | `feat`     | New feature                              |
-| `🐛`  | `fix`      | Bug fix                                  |
-| `♻️`  | `refactor` | Code restructure without behavior change |
-| `🖌️`  | `ui`       | UI-only changes with no logic changes    |
-| `📚`  | `docs`     | Documentation only                       |
-| `🔧`  | `chore`    | Maintenance, tooling, or dependencies    |
-| `🎨`  | `style`    | Formatting-only changes                  |
-| `⚡`  | `perf`     | Performance improvements                 |
-| `🗑️`  | `del`      | Remove files or code                     |
-
-Rules:
-
-- Subject must be lowercase, imperative, and must not end with a period.
-- Subject max length is 50 characters; full line max length is 72 characters.
-- One logical change per commit.
-
-Examples:
-
-```text
-✨ feat(theme): add dark mode preset
-🐛 fix(geocoding): handle null response from nominatim
-♻️ refactor(poster): extract layer drawing into helper
-📚 docs(readme): update setup instructions
-```
+1. Pick an existing issue, or open one to discuss substantial changes.
+2. Create a short descriptive branch such as `fix/geocoding-error` or `feat/svg-export`.
+3. Implement a focused diff.
+4. Run `bun install` if dependencies changed.
+5. Run `bun run build` before opening a PR.
+6. Add screenshots or a short demo for visible UI changes.
 
 ## Code Quality
 
-- Keep code clean, readable, and reusable.
-- The implementation must match the requested behavior and UX, not only a partial interpretation.
-- The diff should be intentionally engineered, not just reorganized to satisfy feedback superficially.
-- Build features as standalone modules or components whenever practical, then import them into the consuming screens.
-- If something is reused, extract it into a shared component, hook, constant, or utility.
-- Reuse existing components and hooks when they already cover the use case.
-- Prefer short, focused functions over long, complex ones.
-- Compose behavior through clear abstractions and interfaces.
-- Separate rendering, state or configuration, and data handling where possible.
-- Avoid hard-coded values. Use named constants, configuration objects, or shared tokens instead.
-- Prefer scalable and maintainable UI assets and controls over placeholders or one-off shortcuts.
-- Follow the naming conventions in [`agent.md`](./agent.md).
-- Add concise comments where intent is not immediately obvious.
-- Do not bypass the port/adapter architecture. Read [`agent.md`](./agent.md) before adding new infrastructure code.
+- Read [agent.md](./agent.md) before changing code.
+- Keep `App.tsx` as a thin shell.
+- Respect the feature layers: domain, application, infrastructure, and UI.
+- Put browser/API/storage I/O in infrastructure adapters, then expose it through application hooks or `core/services.ts`.
+- Reuse existing shared utilities before adding new ones.
+- Prefer named constants, configuration, or reusable helpers over hard-coded values.
+- Keep CSS class names matched by rules in `src/styles/`.
+- Use the `@/` alias for cross-feature imports.
+- Do not edit `bun.lock` manually.
+
+## Commit Messages
+
+Follow the repository commit message convention documented in [`.vscode/commit-instructions.md`](./.vscode/commit-instructions.md).
+
+Keep commits focused: one logical change per commit, lowercase imperative subject, no trailing period.
 
 ## AI-Assisted Contributions
 
-AI-assisted coding is allowed. Vibe-coded submissions are not.
+AI-assisted coding is allowed when the result is reviewed, refined, and aligned with the architecture. Do not submit generated output that contains unverified paths, hard-coded assumptions, incomplete UX, or weak abstractions.
 
-- Review, refine, and fully understand any generated code before opening a PR.
-- Make sure generated code follows the project architecture, naming, and modularity standards.
-- Do not submit generated output that still contains hard-coded assumptions, weak abstractions, or incomplete UX requirements.
-- If a maintainer asks for a specific engineering direction, implement that direction intentionally instead of pasting agent output with minimal changes.
+## Contributor License Agreement
 
-## Contributor License Agreement (CLA)
+This project requires agreement to the [Contributor License Agreement](./CLA.md) for code contributions. By submitting a pull request, you agree to its terms.
 
-This project requires a Contributor License Agreement for code contributions (pull requests, patches, and commits). By submitting a pull request, you agree to the terms in [`CLA.md`](./CLA.md). Opening issues or discussions does not require signing the CLA.
-
-In summary: you retain copyright over your work, but you grant the project maintainer a perpetual, irrevocable, non-exclusive license to use, sublicense, and relicense your contributions — including under commercial or proprietary terms. This is necessary because the project uses a dual-licensing model.
-
-The project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [`LICENSE`](./LICENSE) for the full text.
-
-You sign the CLA by checking the checkbox in the pull request template. Questions can be asked in issues or discussions without signing.
+The project is licensed under AGPL-3.0 for new changes. See [LICENSE](./LICENSE) for details.

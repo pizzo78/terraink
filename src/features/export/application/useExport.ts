@@ -1,26 +1,25 @@
 import { useCallback } from "react";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
-import { localStorageCache } from "@/core/cache/localStorageCache";
 import type { ExportFormat } from "@/features/export/domain/types";
-import { captureMapAsCanvas } from "@/features/export/infrastructure/mapExporter";
-import { compositeExport } from "@/features/poster/infrastructure/renderer";
-import { resolveCanvasSize } from "@/features/poster/infrastructure/renderer/canvas";
-import { getAllMarkerIcons } from "@/features/markers/infrastructure/iconRegistry";
-import { ensureGoogleFont } from "@/core/services";
 import {
+  captureMapAsCanvas,
+  compositeExport,
   createPngBlob,
   createPdfBlobFromCanvas,
   createLayeredSvgBlobFromMap,
   createPosterFilename,
+  ensureGoogleFont,
+  getAllMarkerIcons,
+  readPosterExportCount,
+  resolveCanvasSize,
   triggerDownloadBlob,
+  writePosterExportCount,
 } from "@/core/services";
 import {
   CM_PER_INCH,
   DEFAULT_POSTER_WIDTH_CM,
   DEFAULT_POSTER_HEIGHT_CM,
 } from "@/core/config";
-
-const EXPORT_COUNT_STORAGE_KEY = "terraink.poster.count";
 
 export type SupportPromptVariant = "first" | "milestone";
 
@@ -30,24 +29,6 @@ export interface SupportPromptState {
 }
 
 export const SUPPORT_PROMPT_EVENT = "terraink:support-prompt";
-
-// Use a 1-year TTL so the export count persists across sessions.
-const EXPORT_COUNT_TTL_MS = 365 * 24 * 60 * 60 * 1000;
-
-function readPosterExportCount(): number {
-  const stored = localStorageCache.read<number>(
-    EXPORT_COUNT_STORAGE_KEY,
-    EXPORT_COUNT_TTL_MS,
-  );
-  if (typeof stored === "number" && Number.isFinite(stored) && stored >= 0) {
-    return Math.floor(stored);
-  }
-  return 0;
-}
-
-function writePosterExportCount(nextCount: number): void {
-  localStorageCache.write(EXPORT_COUNT_STORAGE_KEY, nextCount);
-}
 
 /**
  * Provides handlers for exporting the live poster preview as PNG or PDF.

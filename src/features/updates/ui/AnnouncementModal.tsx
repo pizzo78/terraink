@@ -1,58 +1,12 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { IoClose } from "react-icons/io5";
-import { APP_VERSION, UPDATES_URL } from "@/core/config";
-
-type UpdateCategory =
-  | "new"
-  | "fixed"
-  | "improved"
-  | "info"
-  | "community"
-  | "docs"
-  | "roadmap"
-  | "removed"
-  | "security"
-  | "breaking"
-  | "major"
-  | "perf"
-  | "core";
-
-interface UpdatePoint {
-  type: UpdateCategory;
-  text: string;
-}
-
-interface UpdateStep {
-  title: string;
-  image: string | null;
-  points: UpdatePoint[];
-}
-
-interface UpdateSummary {
-  title?: string;
-  points: UpdatePoint[];
-}
-
-interface UpdateLabels {
-  summaryTitle?: string;
-  detailsTitle?: string;
-}
-
-interface UpdateVersion {
-  version: string;
-  date: string;
-  labels?: UpdateLabels;
-  summary?: UpdateSummary;
-  steps: UpdateStep[];
-}
+import { useAnnouncementRelease } from "@/features/updates/application/useAnnouncementRelease";
+import type { UpdateCategory } from "@/features/updates/domain/types";
 
 interface CategoryMeta {
   icon: string;
   label: string;
 }
-
-const LAST_SEEN_VERSION = "last_seen_version";
-const CURRENT_VERSION = APP_VERSION;
 
 const categoryConfig: Record<UpdateCategory, CategoryMeta> = {
   new: { icon: "✨", label: "New" },
@@ -70,21 +24,6 @@ const categoryConfig: Record<UpdateCategory, CategoryMeta> = {
   core: { icon: "🧭", label: "Core" },
 };
 
-function compareVersions(a: string, b: string): number {
-  const left = a.split(".").map((part) => Number.parseInt(part, 10) || 0);
-  const right = b.split(".").map((part) => Number.parseInt(part, 10) || 0);
-  const length = Math.max(left.length, right.length);
-
-  for (let index = 0; index < length; index += 1) {
-    const diff = (left[index] ?? 0) - (right[index] ?? 0);
-    if (diff !== 0) {
-      return diff > 0 ? 1 : -1;
-    }
-  }
-
-  return 0;
-}
-
 function toDisplayDate(isoDate: string): string {
   const date = new Date(`${isoDate}T00:00:00`);
   if (Number.isNaN(date.getTime())) {
@@ -96,23 +35,6 @@ function toDisplayDate(isoDate: string): string {
     month: "long",
     day: "2-digit",
   }).format(date);
-}
-
-function resolveImagePath(image: string | null, updatesUrl: string): string | null {
-  if (!image) {
-    return null;
-  }
-
-  if (image.startsWith("http://") || image.startsWith("https://")) {
-    return image;
-  }
-
-  try {
-    const updatesBase = new URL(updatesUrl, window.location.origin);
-    return new URL(image, updatesBase).toString();
-  } catch {
-    return image;
-  }
 }
 
 function renderPointText(text: string) {
@@ -132,68 +54,26 @@ function renderPointText(text: string) {
 }
 
 export default function AnnouncementModal() {
+  const { release, loading, markReleaseSeen, resolveImagePath } =
+    useAnnouncementRelease();
   const [viewMode, setViewMode] = useState<"summary" | "details">("summary");
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [release, setRelease] = useState<UpdateVersion | null>(null);
 
   useEffect(() => {
-    if (!CURRENT_VERSION || !UPDATES_URL) {
+    if (!release) {
       return;
     }
 
-    const lastSeenVersion = localStorage.getItem(LAST_SEEN_VERSION) ?? "0.0.0";
-    const isNewer = compareVersions(CURRENT_VERSION, lastSeenVersion) > 0;
+    setViewMode("summary");
+    setCurrentStep(0);
+    setOpen(true);
+  }, [release]);
 
-    if (!isNewer) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    async function loadUpdates() {
-      try {
-        setLoading(true);
-        const response = await fetch(UPDATES_URL, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          return;
-        }
-
-        const data: unknown = await response.json();
-        if (!Array.isArray(data)) {
-          return;
-        }
-
-        const targetRelease = (data as UpdateVersion[]).find(
-          (item) => item.version === CURRENT_VERSION,
-        );
-        if (!targetRelease || !Array.isArray(targetRelease.steps)) {
-          return;
-        }
-
-        setRelease(targetRelease);
-        setViewMode("summary");
-        setCurrentStep(0);
-        setOpen(true);
-      } catch {
-        // Silent fail: modal remains hidden if updates URL is unavailable.
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadUpdates();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
+  const closeModal = useCallback(() => {
+    markReleaseSeen();
+    setOpen(false);
+  }, [markReleaseSeen]);
 
   const totalSteps = release?.steps.length ?? 0;
   const isDetailsMode = viewMode === "details";
@@ -211,25 +91,20 @@ export default function AnnouncementModal() {
     if (!release) {
       return [];
     }
-    if (Array.isArray(release.summary?.points) && release.summary.points.length > 0) {
+    if (
+      Array.isArray(release.summary?.points) &&
+      release.summary.points.length > 0
+    ) {
       return release.summary.points;
     }
 
-    return release.steps
-      .flatMap((step) => step.points)
-      .slice(0, 4);
+    return release.steps.flatMap((step) => step.points).slice(0, 4);
   }, [release]);
   const summaryTitle = release?.summary?.title?.trim() || "Quick Highlights";
-  const summaryHeaderTitle = release?.labels?.summaryTitle?.trim() || "What is new";
+  const summaryHeaderTitle =
+    release?.labels?.summaryTitle?.trim() || "What is new";
   const detailsHeaderTitle =
     release?.labels?.detailsTitle?.trim() || "Update Details";
-
-  function closeModal() {
-    if (CURRENT_VERSION) {
-      localStorage.setItem(LAST_SEEN_VERSION, CURRENT_VERSION);
-    }
-    setOpen(false);
-  }
 
   useEffect(() => {
     if (!open) {
@@ -246,7 +121,7 @@ export default function AnnouncementModal() {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [closeModal, open]);
 
   function handleNext() {
     if (!release) {
@@ -276,9 +151,7 @@ export default function AnnouncementModal() {
   }
 
   const resolvedImagePath =
-    isDetailsMode && activeStep
-      ? resolveImagePath(activeStep.image, UPDATES_URL)
-      : null;
+    isDetailsMode && activeStep ? resolveImagePath(activeStep.image) : null;
 
   return (
     <div className="updates-modal-backdrop" role="presentation" onClick={closeModal}>
@@ -320,9 +193,12 @@ export default function AnnouncementModal() {
         <div className="updates-modal-content">
           <h3>{isDetailsMode ? activeStep?.title : summaryTitle}</h3>
           <ul className="updates-points">
-            {(isDetailsMode && activeStep ? activeStep.points : summaryPoints).map(
-              (point, index) => {
-              const category = categoryConfig[point.type] ?? categoryConfig.improved;
+            {(isDetailsMode && activeStep
+              ? activeStep.points
+              : summaryPoints
+            ).map((point, index) => {
+              const category =
+                categoryConfig[point.type] ?? categoryConfig.improved;
 
               return (
                 <li
@@ -338,8 +214,7 @@ export default function AnnouncementModal() {
                   </div>
                 </li>
               );
-            },
-            )}
+            })}
           </ul>
           {isDetailsMode && resolvedImagePath ? (
             <img
@@ -355,7 +230,11 @@ export default function AnnouncementModal() {
             <div className="updates-actions">
               {isDetailsMode ? (
                 <>
-                  <button type="button" onClick={handleBack} disabled={currentStep === 0}>
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    disabled={currentStep === 0}
+                  >
                     Back
                   </button>
                   <button
@@ -375,7 +254,11 @@ export default function AnnouncementModal() {
                   >
                     Show all details
                   </button>
-                  <button type="button" className="updates-okay-button" onClick={closeModal}>
+                  <button
+                    type="button"
+                    className="updates-okay-button"
+                    onClick={closeModal}
+                  >
                     Okay, got it
                   </button>
                 </>
@@ -387,4 +270,3 @@ export default function AnnouncementModal() {
     </div>
   );
 }
-

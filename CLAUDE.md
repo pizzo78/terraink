@@ -1,15 +1,17 @@
-# PosterEngine — Claude Code Guide
+# PosterEngine - Claude Code Guide
 
 ## Commands
 
 ```bash
-bun install          # install dependencies
-bun run dev          # start dev server (http://localhost:5173)
-bun run build        # production build
-bun run typecheck    # type-check without emitting
+bun install
+bun run dev
+bun run build
+bun run typecheck
 ```
 
-## Architecture: Feature-based + Hexagonal/Clean
+The dev server runs at `http://localhost:5173`.
+
+## Architecture
 
 Source is split into vertical feature slices under `src/features/`:
 
@@ -19,7 +21,7 @@ src/
     export/       location/     map/          markers/
     install/      layout/       poster/       theme/       updates/
   core/
-    cache/        fonts/        http/
+    cache/        fonts/        http/         platform/
     config.ts     services.ts
   shared/
     geo/          hooks/        ui/           utils/
@@ -32,88 +34,90 @@ Each feature has up to four layers:
 | --- | --- | --- |
 | `domain/` | Pure types, port interfaces, pure logic | No |
 | `application/` | Hooks that orchestrate use cases | Yes |
-| `infrastructure/` | Concrete adapters (HTTP, cache, parsers) | No |
+| `infrastructure/` | Concrete adapters and browser/API I/O | No |
 | `ui/` | Components that read context and dispatch | Yes |
 
-### Layer import rules
+## Layer Rules
 
 | Layer | May import | Must not import |
 | --- | --- | --- |
-| `domain/` | nothing | infrastructure, application, ui, React |
-| `application/` | domain, shared, core/config, core/services | infrastructure directly |
-| `infrastructure/` | domain, shared, core | application, ui, React |
+| `domain/` | pure types | infrastructure, application, ui, React |
+| `application/` | domain, shared, `core/config`, `core/services` | infrastructure directly |
+| `infrastructure/` | domain, shared, core adapters/ports | application, ui, React |
 | `ui/` | domain, application, shared/ui, shared/utils | infrastructure directly |
-| `core/services.ts` | infrastructure adapters | any feature |
+| `core/services.ts` | infrastructure adapters | feature UI or application hooks |
 
 ## State Management
 
-- Single source of truth: `PosterContext` — React Context + `useReducer`
-- `posterReducer.ts` owns `PosterState`, `PosterForm`, and `PosterAction`
-- Components call `usePosterContext()` directly — no prop drilling
-- Side-effect logic lives in application hooks: `useFormHandlers`, `useMapSync`, `useGeolocation`, `useLocationAutocomplete`, `useCurrentLocation`, `useExport`
+- Single source of truth: `PosterContext` with React Context plus `useReducer`.
+- `posterReducer.ts` owns `PosterState`, `PosterForm`, and `PosterAction`.
+- Components call `usePosterContext()` directly.
+- Side effects belong in application hooks such as `useMapSync`, `useLocationAutocomplete`, `useCurrentLocation`, `useExport`, and `useAnnouncementRelease`.
 
-## Key Services (`src/core/services.ts`)
+## Key Services
+
+`src/core/services.ts` wires application-facing services:
 
 ```ts
-searchLocations            // location autocomplete
-geocodeLocation            // name → coordinates
-reverseGeocodeCoordinates  // coordinates → name
-ensureGoogleFont           // font loading
-compositeExport            // poster compositing
-captureMapAsCanvas         // map → canvas
-createPngBlob / createPdfBlobFromCanvas / createLayeredSvgBlobFromMap
-createPosterFilename       // generate export filename
-triggerDownloadBlob        // file download
+searchLocations
+geocodeLocation
+reverseGeocodeCoordinates
+ensureGoogleFont
+compositeExport
+captureMapAsCanvas
+createPngBlob
+createPdfBlobFromCanvas
+createLayeredSvgBlobFromMap
+createPosterFilename
+triggerDownloadBlob
+loadUpdateVersions
+readLastSeenUpdateVersion
+writeLastSeenUpdateVersion
 ```
-
-Never call `fetch()`, `localStorage`, or external APIs directly — always go through services.
 
 ## TypeScript
 
-- All new files: `.ts` / `.tsx`. No `.js` in `src/`.
-- `strict: false`, `allowJs: true` — gradual migration is fine
-- Use `@/` alias for all cross-feature imports — never `../../` across feature boundaries
-- Port interfaces go in `domain/ports.ts` or `core/*/ports.ts` with an `I` prefix (`ICache`, `IHttp`)
+- New files in `src/` must be `.ts` or `.tsx`.
+- `strict: false`, `allowJs: true` - gradual migration is fine.
+- Use `@/` for cross-feature imports.
+- Port interfaces use an `I` prefix and live in `domain/ports.ts` or `core/*/ports.ts`.
 
-## Environment Variables
+## Environment
 
-All `VITE_*` vars are accessed **only** through `src/core/config.ts`. Never read `import.meta.env.*` anywhere else. Env vars are optional for local development — never assume they are present for core functionality. See `.env.example` for the full list.
-
-## Naming Conventions
-
-- Components: `PascalCase.tsx`
-- Hooks: `useCamelCase.ts`
-- Utilities / pure functions: `camelCase.ts`
-- Port interfaces: `I` prefix — `ICache`, `IHttp`, `IGeocodePort`
-- CSS classes: `kebab-case` with a matching rule in `src/styles/`
+All `VITE_*` vars are accessed only through `src/core/config.ts`. Environment values are optional for local development.
 
 ## Commit Style
 
-Format: `<emoji> <type>(<scope>): <subject>`
+Use emoji-style Conventional Commits:
 
-```
-🐛 fix(location): fix reverse geocode on startup
-♻️ refactor(core): simplify validation flow
-✨ feat(map): add zoom-to-fit button
+```text
+<emoji> <type>(<scope>): <subject>
 ```
 
-One logical change per commit. Subject: lowercase, imperative, no trailing period, max 50 chars, full line max 72 chars.
+Examples:
+
+```text
+fix(location): handle reverse geocode fallback
+refactor(core): simplify update loading
+feat(map): add zoom-to-fit button
+```
+
+One logical change per commit. Subject is lowercase, imperative, no trailing period, max 50 chars.
 
 ## Branch Strategy
 
 ```text
-feature/fix branch → dev → beta → main
+feature/fix branch -> dev -> beta -> main
 ```
 
-All PRs target `dev`. Never open PRs against `main` or `beta`.
+Target `dev` when that branch is available. Do not open PRs directly against production branches.
 
 ## Do Not
 
-- Add logic to `App.tsx` — it must stay a thin shell
-- Import from `@/lib/`, `@/utils/`, `@/hooks/`, or `@/components/` — those paths do not exist; use `@/shared/`
-- Duplicate utilities — check `shared/utils/` and `shared/geo/` before creating new ones
-- Call `fetch()`, `localStorage`, or `new URL()` inside components or hooks — use `core/services.ts`
-- Add a CSS class without a matching rule in `src/styles/`
-- Prop-drill state more than one level — use `usePosterContext()`
-- Read any file's exports from memory — always verify the actual source first
-- Edit `bun.lock` manually — run `bun install`
+- Add logic to `App.tsx`.
+- Import from non-existent legacy paths such as `@/lib/`, `@/utils/`, `@/hooks/`, or `@/components/`.
+- Duplicate utilities before checking `shared/utils/` and `shared/geo/`.
+- Call `fetch()`, `localStorage`, or `new URL()` inside React components.
+- Add CSS classes without matching rules in `src/styles/`.
+- Prop-drill app state more than one level.
+- Edit `bun.lock` manually.
