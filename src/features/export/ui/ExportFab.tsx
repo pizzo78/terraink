@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useExport } from "@/features/export/application/useExport";
+import { usePosterShareLink } from "@/features/share/application/usePosterShareLink";
 import type { ExportFormat } from "@/features/export/domain/types";
-import { CloseIcon, DownloadIcon, LoaderIcon } from "@/shared/ui/Icons";
+import { CloseIcon, DownloadIcon, LinkIcon, LoaderIcon } from "@/shared/ui/Icons";
 import SocialLinkGroup from "@/shared/ui/SocialLinkGroup";
 
 const FORMAT_OPTIONS: { format: ExportFormat; label: string }[] = [
@@ -16,6 +17,7 @@ interface ExportFabProps {
 
 export default function ExportFab({ isMobile }: ExportFabProps) {
   const { isExporting, exportPoster } = useExport();
+  const { status: shareStatus, copyShareLink } = usePosterShareLink();
   const [isOpen, setIsOpen] = useState(false);
   const [activeFormat, setActiveFormat] = useState<ExportFormat | null>(null);
   const [isTriggerVisible, setIsTriggerVisible] = useState(true);
@@ -87,7 +89,7 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="export-modal-header">
-              <h3 id="export-modal-title">Download Poster</h3>
+              <h3 id="export-modal-title">Export Poster</h3>
               <button
                 type="button"
                 className="export-modal-close"
@@ -98,6 +100,23 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
               </button>
             </div>
             <div className="export-modal-actions">
+              <button
+                type="button"
+                className={`export-modal-option export-modal-option--share${
+                  shareStatus === "copied" ? " is-copied" : ""
+                }${shareStatus === "failed" ? " is-failed" : ""}`}
+                onClick={() => void copyShareLink()}
+                disabled={isExporting}
+              >
+                <LinkIcon className="export-modal-option-icon" />
+                <span>
+                  {shareStatus === "copied"
+                    ? "Copied"
+                    : shareStatus === "failed"
+                      ? "Copy Failed"
+                      : "Copy Link"}
+                </span>
+              </button>
               {FORMAT_OPTIONS.map(({ format, label }) => (
                 <button
                   key={format}

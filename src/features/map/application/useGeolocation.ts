@@ -12,8 +12,15 @@ import type { PosterAction } from "@/features/poster/application/posterReducer";
  * Initializes map start position from browser geolocation.
  * Falls back to Hanover coordinates when geolocation is unavailable or denied.
  */
-export function useGeolocation(dispatch: React.Dispatch<PosterAction>) {
+export function useGeolocation(
+  dispatch: React.Dispatch<PosterAction>,
+  options?: { enabled?: boolean },
+) {
   useEffect(() => {
+    if (options?.enabled === false) {
+      return undefined;
+    }
+
     let cancelled = false;
     const defaultLocationLabel =
       "Hanover, Region Hannover, Lower Saxony, Germany";
@@ -81,5 +88,5 @@ export function useGeolocation(dispatch: React.Dispatch<PosterAction>) {
     return () => {
       cancelled = true;
     };
-  }, [dispatch]);
+  }, [dispatch, options?.enabled]);
 }

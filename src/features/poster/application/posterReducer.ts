@@ -9,8 +9,46 @@ import {
   MIN_MARKER_SIZE,
 } from "@/features/markers/domain/constants";
 import { createDefaultMarkerSettings } from "@/features/markers/infrastructure/helpers";
-import { featuredMarkerIcons } from "@/features/markers/infrastructure/iconRegistry";
+import {
+  featuredMarkerIcons,
+  predefinedMarkerIcons,
+} from "@/features/markers/infrastructure/iconRegistry";
 import { clamp } from "@/shared/geo/math";
+import { DISPLAY_PALETTE_KEYS } from "@/features/theme/domain/types";
+import type { SharedPosterPayload } from "@/features/share/domain/types";
+
+const POSTER_FORM_SHARE_KEYS = new Set([
+  "location",
+  "latitude",
+  "longitude",
+  "distance",
+  "width",
+  "height",
+  "theme",
+  "layout",
+  "displayCity",
+  "displayCountry",
+  "displayContinent",
+  "fontFamily",
+  "showPosterText",
+  "includeCredits",
+  "includeLandcover",
+  "includeBuildings",
+  "includeWater",
+  "includeParks",
+  "includeAeroway",
+  "includeRail",
+  "includeRoads",
+  "includeRoadPath",
+  "includeRoadMinorLow",
+  "includeRoadOutline",
+  "showMarkers",
+]);
+const POSTER_COLOR_SHARE_KEYS = new Set<string>(DISPLAY_PALETTE_KEYS);
+const POSTER_MARKER_ICON_SHARE_KEYS = new Set(
+  predefinedMarkerIcons.map((icon) => icon.id),
+);
+const HEX_COLOR_PATTERN = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 /* ────── Form state ────── */
 
@@ -369,4 +407,135 @@ export function posterReducer(
     default:
       return state;
   }
+}
+
+function normalizeSharedFormFields(
+  fields: SharedPosterPayload["form"],
+): Partial<PosterForm> {
+  if (!fields || typeof fields !== "object") {
+    return {};
+  }
+
+  const nextFields: Partial<PosterForm> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (
+      POSTER_FORM_SHARE_KEYS.has(key) &&
+      (typeof value === "string" || typeof value === "boolean")
+    ) {
+      (nextFields as Record<string, string | boolean>)[key] = value;
+    }
+  }
+
+  return nextFields;
+}
+
+function normalizeSharedColors(
+  colors: SharedPosterPayload["customColors"],
+): Record<string, string> {
+  if (!colors || typeof colors !== "object") {
+    return {};
+  }
+
+  return Object.entries(colors).reduce<Record<string, string>>(
+    (acc, [key, value]) => {
+      const color = normalizeSharedHexColor(value);
+      if (POSTER_COLOR_SHARE_KEYS.has(key) && color) {
+        acc[key] = color;
+      }
+      return acc;
+    },
+    {},
+  );
+}
+
+function normalizeSharedHexColor(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const color = value.trim();
+  return HEX_COLOR_PATTERN.test(color) ? color : null;
+}
+
+function normalizeSharedMarkerIconId(value: unknown): string {
+  const iconId = typeof value === "string" ? value.trim() : "";
+  return POSTER_MARKER_ICON_SHARE_KEYS.has(iconId) ? iconId : "pin";
+}
+
+export function restoreSharedPosterState(
+  state: PosterState,
+  payload: SharedPosterPayload | null,
+): PosterState {
+  if (!payload) {
+    return state;
+  }
+
+  const sharedMarkerDefaultColor = normalizeSharedHexColor(
+    payload.markerDefaults?.color,
+  );
+  const markerDefaults = {
+    ...state.markerDefaults,
+    ...(typeof payload.markerDefaults?.size === "number"
+      ? {
+          size: clamp(
+            payload.markerDefaults.size,
+            MIN_MARKER_SIZE,
+            MAX_MARKER_SIZE,
+          ),
+        }
+      : {}),
+    ...(sharedMarkerDefaultColor ? { color: sharedMarkerDefaultColor } : {}),
+  };
+
+  const markers = Array.isArray(payload.markers)
+    ? payload.markers
+        .map((marker, index): MarkerItem | null => {
+          if (!marker || typeof marker !== "object") {
+            return null;
+          }
+
+          const sharedMarker = marker as Record<string, unknown>;
+          const lat = Number(sharedMarker.lat);
+          const lon = Number(sharedMarker.lon);
+          if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            return null;
+          }
+
+          const markerSize = Number(sharedMarker.size);
+          const markerColor = normalizeSharedHexColor(sharedMarker.color);
+
+          return {
+            id: `shared-marker-${index}-${lat.toFixed(6)}-${lon.toFixed(6)}`,
+            lat,
+            lon,
+            iconId: normalizeSharedMarkerIconId(sharedMarker.iconId),
+            size: Number.isFinite(markerSize)
+              ? clamp(markerSize, MIN_MARKER_SIZE, MAX_MARKER_SIZE)
+              : markerDefaults.size,
+            color: markerColor ?? markerDefaults.color,
+          };
+        })
+        .filter((marker): marker is MarkerItem => marker !== null)
+    : state.markers;
+
+  return {
+    ...state,
+    form: {
+      ...state.form,
+      ...normalizeSharedFormFields(payload.form),
+    },
+    customColors: normalizeSharedColors(payload.customColors),
+    markerDefaults,
+    markers,
+    customMarkerIcons: [],
+    isMarkerEditorActive: false,
+    activeMarkerId: null,
+    selectedLocation: null,
+    userLocation: null,
+    isLocationFocused: false,
+    error: "",
+    displayNameOverrides: {
+      city: false,
+      country: false,
+    },
+  };
 }

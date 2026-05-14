@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   posterReducer,
+  restoreSharedPosterState,
   type PosterState,
   type PosterAction,
   type PosterForm,
@@ -40,6 +41,7 @@ import {
   DEFAULT_LAT,
   DEFAULT_LON,
 } from "@/core/config";
+import { readPosterSharePayload } from "@/core/services";
 
 const defaultLayoutOption = getLayoutOption(defaultLayoutId);
 const defaultLayoutWidthCm = Number(
@@ -101,6 +103,12 @@ const INITIAL_STATE: PosterState = {
   },
 };
 
+const initialSharedPayload = readPosterSharePayload();
+const INITIAL_POSTER_STATE = restoreSharedPosterState(
+  INITIAL_STATE,
+  initialSharedPayload,
+);
+
 /* ────── Context shapes ────── */
 
 interface PosterDispatchContextValue {
@@ -123,13 +131,13 @@ const PosterContext = createContext<PosterContextValue | null>(null);
 /* ────── Provider ────── */
 
 export function PosterProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(posterReducer, INITIAL_STATE);
+  const [state, dispatch] = useReducer(posterReducer, INITIAL_POSTER_STATE);
   const mapRef = useRef(null) as MapInstanceRef;
   const lastSyncedMarkerThemeColorRef = useRef<string | null>(null);
   const hasLoadedCustomIconsRef = useRef(false);
 
   // Set initial position from browser geolocation (or Hanover fallback)
-  useGeolocation(dispatch);
+  useGeolocation(dispatch, { enabled: !initialSharedPayload });
 
   const selectedTheme = useMemo(
     () => getTheme(state.form.theme),
@@ -146,6 +154,11 @@ export function PosterProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const markerThemeColor = effectiveTheme.ui.text;
     const previouslySynced = lastSyncedMarkerThemeColorRef.current;
+
+    if (initialSharedPayload && previouslySynced === null) {
+      lastSyncedMarkerThemeColorRef.current = markerThemeColor;
+      return;
+    }
 
     if (previouslySynced === markerThemeColor) {
       return;

@@ -13,6 +13,7 @@ The repository may still appear under the historical `terraink` name in some too
 - Curated map themes with custom color overrides
 - Layer controls for landcover, buildings, water, parks, roads, rail, and aeroway
 - Marker placement with built-in and uploaded marker icons
+- Shareable poster links for saving or sending a design
 - Typography controls for poster labels and Google Fonts
 - High-resolution PNG, PDF, and layered SVG export
 - PWA support with a small service worker for static assets and map tiles

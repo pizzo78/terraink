@@ -117,6 +117,24 @@
   color: #effff5;
 }
 
+.export-modal-option--share {
+  background: rgba(17, 33, 47, 0.92);
+  border-color: rgba(146, 176, 200, 0.28);
+  color: rgba(218, 238, 250, 0.94);
+}
+
+.export-modal-option--share.is-copied {
+  background: rgba(42, 126, 79, 0.92);
+  border-color: rgba(120, 221, 161, 0.52);
+  color: #effff5;
+}
+
+.export-modal-option--share.is-failed {
+  background: rgba(92, 31, 31, 0.92);
+  border-color: rgba(255, 142, 142, 0.42);
+  color: #ffd8d8;
+}
+
 .export-modal-option-icon {
   width: 24px;
   height: 24px;

@@ -19,7 +19,7 @@ Source is split into vertical feature slices under `src/features/`:
 src/
   features/
     export/       location/     map/          markers/
-    install/      layout/       poster/       theme/       updates/
+    install/      layout/       poster/       share/       theme/       updates/
   core/
     cache/        fonts/        http/         platform/
     config.ts     services.ts
@@ -70,6 +70,9 @@ createPdfBlobFromCanvas
 createLayeredSvgBlobFromMap
 createPosterFilename
 triggerDownloadBlob
+createPosterShareUrl
+readPosterSharePayload
+copyTextToClipboard
 loadUpdateVersions
 readLastSeenUpdateVersion
 writeLastSeenUpdateVersion

@@ -26,6 +26,12 @@ export const resolveUpdateImagePath = updates.resolveUpdateImagePath;
 export const ensureGoogleFont =
   googleFontsAdapter.ensureFont.bind(googleFontsAdapter);
 
+export {
+  copyTextToClipboard,
+  createPosterShareUrl,
+  readPosterSharePayload,
+} from "@/features/share/infrastructure/shareUrl";
+
 export { compositeExport } from "@/features/poster/infrastructure/renderer";
 export { resolveCanvasSize } from "@/features/poster/infrastructure/renderer/canvas";
 
