@@ -65,7 +65,7 @@ Build and run with Docker Compose:
 docker compose up -d --build
 ```
 
-The app is served on `http://localhost:7200` by default. Override the host port with `APP_PORT`.
+The app is served on `http://localhost:7203` by default. Override the host port with `APP_PORT`.
 
 ```powershell
 $env:APP_PORT=80
@@ -82,7 +82,7 @@ Build and run without Compose:
 
 ```bash
 docker build -t posterengine:latest .
-docker run -d --name posterengine -p 7200:80 --restart unless-stopped posterengine:latest
+docker run -d --name posterengine -p 7203:80 --restart unless-stopped posterengine:latest
 ```
 
 ## Architecture

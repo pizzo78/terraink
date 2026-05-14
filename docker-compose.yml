@@ -6,5 +6,5 @@ services:
     image: terraink:latest
     container_name: terraink
     ports:
-      - "${APP_PORT:-7200}:80"
+      - "${APP_PORT:-7203}:80"
     restart: unless-stopped
