@@ -47,6 +47,7 @@ const POSTER_FORM_SHARE_KEYS = new Set([
   "includeRoadMinorLow",
   "includeRoadOutline",
   "showMarkers",
+  "showRoute",
 ]);
 const POSTER_COLOR_SHARE_KEYS = new Set<string>(DISPLAY_PALETTE_KEYS);
 const POSTER_MARKER_ICON_SHARE_KEYS = new Set(
@@ -82,6 +83,7 @@ export interface PosterForm {
   includeRoadMinorLow: boolean;
   includeRoadOutline: boolean;
   showMarkers: boolean;
+  showRoute: boolean;
 }
 
 /* ────── App-level state ────── */

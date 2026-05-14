@@ -4,7 +4,10 @@ import type {
   MarkerIconDefinition,
   MarkerItem,
 } from "@/features/markers/domain/types";
-import { drawMarkersOnCanvas } from "@/features/markers/infrastructure/rendering";
+import {
+  drawMarkerRouteOnCanvas,
+  drawMarkersOnCanvas,
+} from "@/features/markers/infrastructure/rendering";
 import { applyFades } from "@/features/poster/infrastructure/renderer/layers";
 import { drawPosterText } from "@/features/poster/infrastructure/renderer/typography";
 import type { ResolvedTheme } from "@/features/theme/domain/types";
@@ -25,6 +28,8 @@ interface LayeredSvgOptions {
   fontFamily?: string;
   showPosterText: boolean;
   showOverlay: boolean;
+  showRoute?: boolean;
+  routeColor?: string;
   includeCredits: boolean;
   markers: MarkerItem[];
   markerIcons: MarkerIconDefinition[];
@@ -79,6 +84,8 @@ export async function createLayeredSvgBlobFromMap({
   fontFamily,
   showPosterText,
   showOverlay,
+  showRoute = false,
+  routeColor,
   includeCredits,
   markers,
   markerIcons,
@@ -164,6 +171,20 @@ export async function createLayeredSvgBlobFromMap({
         id: "fades",
         dataUrl: canvasToDataUrl(exportWidth, exportHeight, (ctx) => {
           applyFades(ctx, exportWidth, exportHeight, theme.ui.bg);
+        }),
+      });
+    }
+
+    if (showRoute && markers.length > 1) {
+      overlayLayers.push({
+        id: "route",
+        dataUrl: canvasToDataUrl(exportWidth, exportHeight, (ctx) => {
+          drawMarkerRouteOnCanvas(ctx, markers, markerProjection, {
+            color: routeColor || theme.ui.text,
+            scaleX: markerScaleX,
+            scaleY: markerScaleY,
+            width: Math.max(4, Math.min(exportWidth, exportHeight) * 0.0024),
+          });
         }),
       });
     }

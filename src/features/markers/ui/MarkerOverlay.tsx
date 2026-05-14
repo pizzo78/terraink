@@ -61,6 +61,8 @@ interface MarkerOverlayProps {
   onActiveMarkerChange?: (markerId: string | null) => void;
   onMarkerPositionChange?: (markerId: string, lat: number, lon: number) => void;
   onMarkerSizeChange?: (markerId: string, size: number) => void;
+  showRoute?: boolean;
+  routeColor?: string;
   overzoomScale: number;
 }
 
@@ -90,6 +92,8 @@ export default function MarkerOverlay({
   onActiveMarkerChange,
   onMarkerPositionChange,
   onMarkerSizeChange,
+  showRoute = false,
+  routeColor = "#ffffff",
   overzoomScale,
 }: MarkerOverlayProps) {
   const [renderTick, setRenderTick] = useState(0);
@@ -521,6 +525,10 @@ export default function MarkerOverlay({
     return null;
   }
 
+  const routePoints = projectedMarkers
+    .map(({ x, y }) => `${Number(x.toFixed(2))},${Number(y.toFixed(2))}`)
+    .join(" ");
+
   return (
     <div
       ref={overlayRef}
@@ -528,6 +536,17 @@ export default function MarkerOverlay({
       aria-hidden={!isMarkerEditMode ? "true" : undefined}
       onWheel={handleOverlayWheel}
     >
+      {showRoute && projectedMarkers.length > 1 ? (
+        <svg className="poster-marker-route" aria-hidden="true">
+          <polyline
+            points={routePoints}
+            fill="none"
+            stroke={routeColor}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : null}
       {projectedMarkers.map(({ marker, icon, x, y }) => (
         <div
           key={marker.id}

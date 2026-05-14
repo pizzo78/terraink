@@ -422,6 +422,8 @@ export default function PreviewPanel() {
               onActiveMarkerChange={handleMarkerActiveChange}
               onMarkerPositionChange={handleMarkerPositionChange}
               onMarkerSizeChange={handleMarkerSizeChange}
+              showRoute={form.showRoute}
+              routeColor={effectiveTheme.ui.text}
               overzoomScale={overzoomScale}
             />
           ) : null}

@@ -2272,6 +2272,32 @@ button.marker-row__icon-btn--danger {
   gap: 10px;
 }
 
+.marker-route-toggle {
+  min-height: 42px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid rgba(146, 176, 200, 0.18);
+  border-radius: 8px;
+  background: rgba(17, 33, 47, 0.62);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Spline Sans Mono", monospace;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.marker-route-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: #e7f2fa;
+}
+
+.marker-route-toggle:has(input:disabled) {
+  opacity: 0.52;
+}
+
 .marker-editor-card__size-row,
 .marker-editor-card__color-row {
   display: grid;

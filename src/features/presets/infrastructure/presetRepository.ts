@@ -20,6 +20,7 @@ export const posterPresets: PosterPreset[] = [
       includeRoadMinorLow: true,
       includeRoadOutline: true,
       showMarkers: true,
+      showRoute: false,
     },
     exportSettings: {
       dpi: 300,
@@ -48,6 +49,7 @@ export const posterPresets: PosterPreset[] = [
       includeRoadMinorLow: false,
       includeRoadOutline: true,
       showMarkers: false,
+      showRoute: false,
     },
     exportSettings: {
       dpi: 300,
@@ -76,6 +78,7 @@ export const posterPresets: PosterPreset[] = [
       includeRoadMinorLow: true,
       includeRoadOutline: false,
       showMarkers: true,
+      showRoute: false,
     },
     exportSettings: {
       dpi: 150,
@@ -104,6 +107,7 @@ export const posterPresets: PosterPreset[] = [
       includeRoadMinorLow: true,
       includeRoadOutline: true,
       showMarkers: false,
+      showRoute: false,
     },
     exportSettings: {
       dpi: 150,

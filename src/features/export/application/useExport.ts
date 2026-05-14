@@ -48,6 +48,7 @@ export function useExport() {
   const { state, dispatch, effectiveTheme, mapRef } = usePosterContext();
   const { form } = state;
   const hasVisibleMarkers = form.showMarkers && state.markers.length > 0;
+  const hasVisibleRoute = form.showMarkers && form.showRoute && state.markers.length > 1;
   const exportSettings = normalizeExportSettings(state.exportSettings);
 
   const registerSuccessfulExport = useCallback(() => {
@@ -123,6 +124,8 @@ export function useExport() {
             fontFamily: form.fontFamily.trim(),
             showPosterText: form.showPosterText,
             showOverlay: form.showMarkers,
+            showRoute: hasVisibleRoute,
+            routeColor: effectiveTheme.ui.text,
             includeCredits: form.includeCredits,
             markers: hasVisibleMarkers ? state.markers : [],
             markerIcons: hasVisibleMarkers
@@ -160,6 +163,8 @@ export function useExport() {
           fontFamily: form.fontFamily.trim(),
           showPosterText: form.showPosterText,
           showOverlay: form.showMarkers,
+          showRoute: hasVisibleRoute,
+          routeColor: effectiveTheme.ui.text,
           includeCredits: form.includeCredits,
           markers: hasVisibleMarkers ? state.markers : [],
           markerIcons: hasVisibleMarkers
@@ -207,6 +212,7 @@ export function useExport() {
       exportSettings,
       dispatch,
       hasVisibleMarkers,
+      hasVisibleRoute,
       registerSuccessfulExport,
       state.markers,
       state.customMarkerIcons,

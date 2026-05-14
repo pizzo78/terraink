@@ -24,6 +24,7 @@ export interface SharedPosterForm {
   includeRoadMinorLow?: boolean;
   includeRoadOutline?: boolean;
   showMarkers?: boolean;
+  showRoute?: boolean;
 }
 
 export interface SharedMarker {

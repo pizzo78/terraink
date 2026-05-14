@@ -1,6 +1,9 @@
 import { applyFades } from "./layers";
 import { drawPosterText } from "./typography";
-import { drawMarkersOnCanvas } from "@/features/markers/infrastructure/rendering";
+import {
+  drawMarkerRouteOnCanvas,
+  drawMarkersOnCanvas,
+} from "@/features/markers/infrastructure/rendering";
 import type { ExportOptions, CanvasSize } from "../../domain/types";
 
 /**
@@ -26,6 +29,8 @@ export async function compositeExport(
     fontFamily,
     showPosterText = true,
     showOverlay = true,
+    showRoute = false,
+    routeColor,
     includeCredits = false,
     markers = [],
     markerIcons = [],
@@ -53,7 +58,17 @@ export async function compositeExport(
     applyFades(ctx, width, height, theme.ui.bg);
   }
 
-  // 3. Markers
+  // 3. Route
+  if (showRoute && markers.length > 1 && markerProjection) {
+    drawMarkerRouteOnCanvas(ctx, markers, markerProjection, {
+      color: routeColor || theme.ui.text,
+      scaleX: markerScaleX,
+      scaleY: markerScaleY,
+      width: Math.max(4, Math.min(width, height) * 0.0024),
+    });
+  }
+
+  // 4. Markers
   if (markers.length > 0 && markerIcons.length > 0 && markerProjection) {
     await drawMarkersOnCanvas(
       ctx,
@@ -66,7 +81,7 @@ export async function compositeExport(
     );
   }
 
-  // 4. Poster text
+  // 5. Poster text
   drawPosterText(
     ctx,
     width,

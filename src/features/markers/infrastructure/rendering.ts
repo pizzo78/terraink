@@ -99,3 +99,46 @@ export async function drawMarkersOnCanvas(
     }),
   );
 }
+
+export function drawMarkerRouteOnCanvas(
+  ctx: CanvasRenderingContext2D,
+  markers: MarkerItem[],
+  projection: MarkerProjectionInput,
+  options: {
+    color: string;
+    scaleX?: number;
+    scaleY?: number;
+    width?: number;
+  },
+) {
+  if (markers.length < 2) {
+    return;
+  }
+
+  const scaleX = options.scaleX ?? 1;
+  const scaleY = options.scaleY ?? 1;
+  const points = markers.map((marker) => {
+    const point = projectMarkerToCanvas(marker.lat, marker.lon, projection);
+    return {
+      x: point.x * scaleX,
+      y: point.y * scaleY,
+    };
+  });
+
+  ctx.save();
+  ctx.strokeStyle = options.color;
+  ctx.lineWidth = Math.max(2, options.width ?? 4);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.globalAlpha = 0.82;
+  ctx.beginPath();
+  points.forEach((point, index) => {
+    if (index === 0) {
+      ctx.moveTo(point.x, point.y);
+      return;
+    }
+    ctx.lineTo(point.x, point.y);
+  });
+  ctx.stroke();
+  ctx.restore();
+}

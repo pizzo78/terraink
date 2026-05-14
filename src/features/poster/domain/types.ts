@@ -25,6 +25,8 @@ export interface ExportOptions {
   fontFamily: string;
   showPosterText: boolean;
   showOverlay?: boolean;
+  showRoute?: boolean;
+  routeColor?: string;
   includeCredits?: boolean;
   markers?: MarkerItem[];
   markerIcons?: MarkerIconDefinition[];

@@ -80,6 +80,7 @@ export const DEFAULT_FORM: PosterForm = {
   includeRoadMinorLow: true,
   includeRoadOutline: true,
   showMarkers: true,
+  showRoute: false,
 };
 
 const INITIAL_STATE: PosterState = {

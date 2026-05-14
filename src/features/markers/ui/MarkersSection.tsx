@@ -520,6 +520,22 @@ export default function MarkersSection() {
             </p>
 
             <div className="marker-editor-card__stack">
+              <label className="marker-route-toggle">
+                <input
+                  type="checkbox"
+                  checked={form.showRoute}
+                  disabled={markers.length < 2}
+                  onChange={(event) =>
+                    dispatch({
+                      type: "SET_FIELD",
+                      name: "showRoute",
+                      value: event.target.checked,
+                    })
+                  }
+                />
+                <span>Route</span>
+              </label>
+
               <label>
                 Default Size
                 <div className="marker-editor-card__size-row">
