@@ -4,7 +4,7 @@ import type { ExportFormat } from "@/features/export/domain/types";
 import { DownloadIcon, LoaderIcon } from "@/shared/ui/Icons";
 
 const FLYOUT_FORMATS: { format: ExportFormat; label: string }[] = [
-  { format: "svg", label: "RSVG" },
+  { format: "svg", label: "SVG" },
   { format: "pdf", label: "PDF" },
 ];
 

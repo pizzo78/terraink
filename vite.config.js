@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
@@ -34,51 +34,71 @@ function getPackageName(id) {
   return parts[0];
 }
 
-export default defineConfig({
-  plugins: [react()],
-  define: {
-    "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
-  },
-  build: {
-    // maplibre-gl is distributed as a large prebundled module and remains a
-    // single chunk even with manual chunking.
-    chunkSizeWarningLimit: 1100,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-          const packageName = getPackageName(id);
+function googleVerificationFallbackPlugin(value) {
+  return {
+    name: "posterengine-google-verification-fallback",
+    enforce: "pre",
+    transformIndexHtml(html) {
+      return html.replace(
+        /__POSTERENGINE_GOOGLE_SITE_VERIFICATION__/g,
+        value || "",
+      );
+    },
+  };
+}
 
-          if (packageName === "maplibre-gl") {
-            return "vendor-maplibre-core";
-          }
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
 
-          if (
-            packageName?.startsWith("@maplibre/") ||
-            packageName?.startsWith("@mapbox/") ||
-            MAPLIBRE_DEP_PACKAGES.has(packageName)
-          ) {
-            return "vendor-maplibre-deps";
-          }
+  return {
+    plugins: [
+      googleVerificationFallbackPlugin(env.VITE_GOOGLE_SITE_VERIFICATION),
+      react(),
+    ],
+    define: {
+      "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
+    },
+    build: {
+      // maplibre-gl is distributed as a large prebundled module and remains a
+      // single chunk even with manual chunking.
+      chunkSizeWarningLimit: 1100,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes("node_modules")) return;
+            const packageName = getPackageName(id);
 
-          if (packageName?.startsWith("react-icons")) {
-            return "vendor-icons";
-          }
+            if (packageName === "maplibre-gl") {
+              return "vendor-maplibre-core";
+            }
 
-          if (
-            packageName === "react" ||
-            packageName === "react-dom" ||
-            packageName === "react-colorful"
-          ) {
-            return "vendor-react";
-          }
+            if (
+              packageName?.startsWith("@maplibre/") ||
+              packageName?.startsWith("@mapbox/") ||
+              MAPLIBRE_DEP_PACKAGES.has(packageName)
+            ) {
+              return "vendor-maplibre-deps";
+            }
+
+            if (packageName?.startsWith("react-icons")) {
+              return "vendor-icons";
+            }
+
+            if (
+              packageName === "react" ||
+              packageName === "react-dom" ||
+              packageName === "react-colorful"
+            ) {
+              return "vendor-react";
+            }
+          },
         },
       },
     },
-  },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
+      },
     },
-  },
+  };
 });

@@ -15,7 +15,11 @@ import { findMarkerIcon } from "@/features/markers/infrastructure/iconRegistry";
 import { parseMarkerCsv } from "@/features/markers/infrastructure/csvImport";
 import {
   DEFAULT_MARKER_SIZE,
+  MAX_CUSTOM_MARKER_FILE_BYTES,
+  MAX_CUSTOM_MARKER_ICONS,
+  MAX_MARKER_CSV_FILE_BYTES,
   MAX_MARKER_SIZE,
+  MAX_MARKERS,
   MIN_MARKER_SIZE,
 } from "@/features/markers/domain/constants";
 import MarkerVisual from "./MarkerVisual";
@@ -49,6 +53,21 @@ function readFileAsDataUrl(file: File) {
 function isSvgFile(file: File) {
   return (
     file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg")
+  );
+}
+
+function isSupportedMarkerImageFile(file: File) {
+  const lowerName = file.name.toLowerCase();
+  return (
+    file.type === "image/svg+xml" ||
+    file.type === "image/png" ||
+    file.type === "image/jpeg" ||
+    file.type === "image/webp" ||
+    lowerName.endsWith(".svg") ||
+    lowerName.endsWith(".png") ||
+    lowerName.endsWith(".jpg") ||
+    lowerName.endsWith(".jpeg") ||
+    lowerName.endsWith(".webp")
   );
 }
 
@@ -193,6 +212,11 @@ export default function MarkersSection() {
 
   const addMarker = useCallback(
     (iconId: string) => {
+      if (markers.length >= MAX_MARKERS) {
+        setCsvImportStatus(`Maximum ${MAX_MARKERS} markers reached`);
+        return;
+      }
+
       const center = mapRef.current?.getCenter();
       const fallbackLat = Number(form.latitude) || 0;
       const fallbackLon = Number(form.longitude) || 0;
@@ -209,11 +233,24 @@ export default function MarkersSection() {
         }),
       });
     },
-    [dispatch, form.latitude, form.longitude, mapRef, markerDefaults],
+    [dispatch, form.latitude, form.longitude, mapRef, markerDefaults, markers.length],
   );
 
   const handleUploadIcon = useCallback(
     async (file: File) => {
+      if (markers.length >= MAX_MARKERS) {
+        throw new Error(`Maximum ${MAX_MARKERS} markers reached.`);
+      }
+      if (customMarkerIcons.length >= MAX_CUSTOM_MARKER_ICONS) {
+        throw new Error(`Maximum ${MAX_CUSTOM_MARKER_ICONS} uploaded icons reached.`);
+      }
+      if (file.size > MAX_CUSTOM_MARKER_FILE_BYTES) {
+        throw new Error("Marker uploads must be 512 KB or smaller.");
+      }
+      if (!isSupportedMarkerImageFile(file)) {
+        throw new Error("Upload SVG, PNG, JPG, or WebP markers.");
+      }
+
       const dataUrl = await readFileAsDataUrl(file);
       const icon = createUploadedMarkerIcon({
         label: getUploadLabel(file.name),
@@ -224,13 +261,23 @@ export default function MarkersSection() {
       dispatch({ type: "ADD_CUSTOM_MARKER_ICON", icon });
       addMarker(icon.id);
     },
-    [addMarker, dispatch],
+    [addMarker, customMarkerIcons.length, dispatch, markers.length],
   );
 
   const handleImportCsvFile = useCallback(
     async (file: File) => {
+      if (file.size > MAX_MARKER_CSV_FILE_BYTES) {
+        setCsvImportStatus("CSV must be 256 KB or smaller");
+        return;
+      }
+      const remainingSlots = MAX_MARKERS - markers.length;
+      if (remainingSlots <= 0) {
+        setCsvImportStatus(`Maximum ${MAX_MARKERS} markers reached`);
+        return;
+      }
+
       const text = await file.text();
-      const result = parseMarkerCsv(text);
+      const result = parseMarkerCsv(text, { maxMarkers: remainingSlots });
       if (result.markers.length === 0) {
         setCsvImportStatus("No valid rows");
         return;
@@ -249,11 +296,11 @@ export default function MarkersSection() {
       });
       setCsvImportStatus(
         result.skippedRows > 0
-          ? `Imported ${result.markers.length}, skipped ${result.skippedRows}`
+          ? `Imported ${result.markers.length}, skipped ${result.skippedRows} (max ${MAX_MARKERS})`
           : `Imported ${result.markers.length}`,
       );
     },
-    [dispatch, markerDefaults],
+    [dispatch, markerDefaults, markers.length],
   );
 
   const markerRows = useMemo(

@@ -1,4 +1,5 @@
 import type { MarkerIconDefinition } from "@/features/markers/domain/types";
+import { MAX_CUSTOM_MARKER_ICONS } from "@/features/markers/domain/constants";
 
 const DB_NAME = "terraink-markers";
 const STORE_NAME = "custom-icons";
@@ -22,7 +23,7 @@ function openDatabase(): Promise<IDBDatabase> {
 }
 
 function toStoredIcons(icons: MarkerIconDefinition[]) {
-  return icons.map((icon) => ({
+  return icons.slice(0, MAX_CUSTOM_MARKER_ICONS).map((icon) => ({
     id: icon.id,
     label: icon.label,
     source: icon.source,

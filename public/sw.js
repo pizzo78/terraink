@@ -1,6 +1,7 @@
 const CACHE_NAME = "terraink-static-v2";
-const TILE_CACHE_NAME = "terraink-tiles-v1";
+const TILE_CACHE_NAME = "terraink-tiles-v2";
 const TILE_ORIGINS = ["https://tiles.openfreemap.org"];
+const MAX_TILE_CACHE_ENTRIES = 800;
 const APP_SHELL_ASSETS = [
   "/",
   "/index.html",
@@ -12,6 +13,16 @@ const APP_SHELL_ASSETS = [
   "/assets/favicon-16.png",
   "/assets/apple-touch-icon.png",
 ];
+
+async function trimCache(cache, maxEntries) {
+  const keys = await cache.keys();
+  if (keys.length <= maxEntries) {
+    return;
+  }
+
+  const deleteCount = keys.length - maxEntries;
+  await Promise.all(keys.slice(0, deleteCount).map((key) => cache.delete(key)));
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -61,7 +72,12 @@ self.addEventListener("fetch", (event) => {
           if (cached) return cached;
           return fetch(request).then((response) => {
             if (response.ok) {
-              cache.put(request, response.clone());
+              event.waitUntil(
+                cache
+                  .put(request, response.clone())
+                  .then(() => trimCache(cache, MAX_TILE_CACHE_ENTRIES))
+                  .catch(() => undefined),
+              );
             }
             return response;
           });

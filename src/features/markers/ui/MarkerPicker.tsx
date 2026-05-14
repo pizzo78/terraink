@@ -11,6 +11,7 @@ import {
   featuredMarkerIcons,
   predefinedMarkerIcons,
 } from "@/features/markers/infrastructure/iconRegistry";
+import { MAX_CUSTOM_MARKER_FILE_BYTES } from "@/features/markers/domain/constants";
 import MarkerVisual from "./MarkerVisual";
 
 interface MarkerPickerProps {
@@ -52,11 +53,25 @@ const MarkerPicker = memo(function MarkerPicker({
       return;
     }
 
-    if (
-      !file.type.startsWith("image/") &&
-      !file.name.toLowerCase().endsWith(".svg")
-    ) {
+    const lowerName = file.name.toLowerCase();
+    const supportedType =
+      file.type === "image/svg+xml" ||
+      file.type === "image/png" ||
+      file.type === "image/jpeg" ||
+      file.type === "image/webp" ||
+      lowerName.endsWith(".svg") ||
+      lowerName.endsWith(".png") ||
+      lowerName.endsWith(".jpg") ||
+      lowerName.endsWith(".jpeg") ||
+      lowerName.endsWith(".webp");
+
+    if (!supportedType) {
       setUploadError("Upload an image or SVG file.");
+      return;
+    }
+
+    if (file.size > MAX_CUSTOM_MARKER_FILE_BYTES) {
+      setUploadError("Marker uploads must be 512 KB or smaller.");
       return;
     }
 
@@ -65,8 +80,10 @@ const MarkerPicker = memo(function MarkerPicker({
 
     try {
       await onUploadIcon(file);
-    } catch {
-      setUploadError("Could not upload marker.");
+    } catch (err) {
+      setUploadError(
+        err instanceof Error ? err.message : "Could not upload marker.",
+      );
     }
   };
 
@@ -160,7 +177,7 @@ const MarkerPicker = memo(function MarkerPicker({
             <input
               ref={inputRef}
               type="file"
-              accept=".svg,image/*"
+              accept=".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp"
               className="marker-picker__file-input"
               onChange={handleUploadChange}
             />

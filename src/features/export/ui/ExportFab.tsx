@@ -12,7 +12,19 @@ import SocialLinkGroup from "@/shared/ui/SocialLinkGroup";
 const FORMAT_OPTIONS: { format: ExportFormat; label: string }[] = [
   { format: "png", label: "PNG" },
   { format: "pdf", label: "PDF" },
-  { format: "svg", label: "RSVG" },
+  { format: "svg", label: "SVG" },
+];
+
+const ADVANCED_FORMAT_OPTIONS: {
+  format: ExportFormat;
+  label: string;
+  note: string;
+}[] = [
+  {
+    format: "svg-layered",
+    label: "Layered SVG",
+    note: "Advanced, larger file",
+  },
 ];
 
 interface ExportFabProps {
@@ -22,7 +34,14 @@ interface ExportFabProps {
 export default function ExportFab({ isMobile }: ExportFabProps) {
   const { isExporting, exportPoster, exportSettings, setExportSettings } =
     useExport();
-  const { status: shareStatus, copyShareLink } = usePosterShareLink();
+  const {
+    status: shareStatus,
+    copyShareLink,
+    markerLimitExceeded,
+    sharedMarkerCount,
+    totalMarkerCount,
+    maxSharedMarkers,
+  } = usePosterShareLink();
   const [isOpen, setIsOpen] = useState(false);
   const [activeFormat, setActiveFormat] = useState<ExportFormat | null>(null);
   const [isTriggerVisible, setIsTriggerVisible] = useState(true);
@@ -204,7 +223,9 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
                 type="button"
                 className={`export-modal-option export-modal-option--share${
                   shareStatus === "copied" ? " is-copied" : ""
-                }${shareStatus === "failed" ? " is-failed" : ""}`}
+                }${shareStatus === "limited" ? " is-limited" : ""}${
+                  shareStatus === "failed" ? " is-failed" : ""
+                }`}
                 onClick={() => void copyShareLink()}
                 disabled={isExporting}
               >
@@ -212,11 +233,19 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
                 <span>
                   {shareStatus === "copied"
                     ? "Copied"
+                    : shareStatus === "limited"
+                      ? `Copied ${sharedMarkerCount}/${totalMarkerCount}`
                     : shareStatus === "failed"
                       ? "Copy Failed"
                       : "Copy Link"}
                 </span>
               </button>
+              {markerLimitExceeded ? (
+                <p className="export-modal-warning">
+                  Share links include up to {maxSharedMarkers} markers. Only the
+                  first {maxSharedMarkers} will be copied.
+                </p>
+              ) : null}
               {FORMAT_OPTIONS.map(({ format, label }) => (
                 <button
                   key={format}
@@ -233,6 +262,26 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
                   <span>{label}</span>
                 </button>
               ))}
+              <div className="export-modal-advanced">
+                <p className="export-modal-advanced-label">Advanced</p>
+                {ADVANCED_FORMAT_OPTIONS.map(({ format, label, note }) => (
+                  <button
+                    key={format}
+                    type="button"
+                    className="export-modal-option export-modal-option--svg-layered"
+                    onClick={() => runExport(format)}
+                    disabled={isExporting}
+                  >
+                    {isExporting && activeFormat === format ? (
+                      <LoaderIcon className="export-modal-option-icon is-spinning" />
+                    ) : (
+                      <DownloadIcon className="export-modal-option-icon" />
+                    )}
+                    <span>{label}</span>
+                    <small>{note}</small>
+                  </button>
+                ))}
+              </div>
             </div>
             <p className="export-modal-support-label">
               Support the project <span className="heart">❤︎</span>

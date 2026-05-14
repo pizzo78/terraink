@@ -9,11 +9,12 @@ import type {
   SharedMarker,
   SharedPosterPayload,
 } from "@/features/share/domain/types";
+import { MAX_MARKERS } from "@/features/markers/domain/constants";
 
-const MAX_SHARED_MARKERS = 50;
+export const MAX_SHARED_MARKERS = MAX_MARKERS;
 const SHARE_STATUS_RESET_MS = 1800;
 
-type ShareStatus = "idle" | "copied" | "failed";
+type ShareStatus = "idle" | "copied" | "limited" | "failed";
 
 function toRoundedCoordinate(value: number): number {
   return Math.round(value * 1_000_000) / 1_000_000;
@@ -71,7 +72,7 @@ export function usePosterShareLink() {
     try {
       const shareUrl = createPosterShareUrl(createSharedPosterPayload(state));
       await copyTextToClipboard(shareUrl);
-      setStatus("copied");
+      setStatus(state.markers.length > MAX_SHARED_MARKERS ? "limited" : "copied");
     } catch {
       setStatus("failed");
     }
@@ -88,5 +89,9 @@ export function usePosterShareLink() {
   return {
     status,
     copyShareLink,
+    maxSharedMarkers: MAX_SHARED_MARKERS,
+    markerLimitExceeded: state.markers.length > MAX_SHARED_MARKERS,
+    sharedMarkerCount: Math.min(state.markers.length, MAX_SHARED_MARKERS),
+    totalMarkerCount: state.markers.length,
   };
 }

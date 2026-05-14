@@ -10,6 +10,7 @@ import {
   compositeExport,
   createPngBlob,
   createPdfBlobFromCanvas,
+  createFlatSvgBlobFromCanvas,
   createLayeredSvgBlobFromMap,
   createPosterFilename,
   ensureGoogleFont,
@@ -113,7 +114,7 @@ export function useExport() {
         const lon = Number(form.longitude) || 0;
         const textScale = (Number(form.textScale) || 100) / 100;
 
-        if (format === "svg") {
+        if (format === "svg-layered") {
           const svgBlob = await createLayeredSvgBlobFromMap({
             map,
             exportWidth: size.width,
@@ -198,6 +199,9 @@ export function useExport() {
             cropMarks: settings.cropMarks,
           });
           await triggerDownloadBlob(pdfBlob, filename);
+        } else if (format === "svg") {
+          const svgBlob = createFlatSvgBlobFromCanvas(canvas);
+          await triggerDownloadBlob(svgBlob, filename);
         } else {
           const pngBlob = await createPngBlob(canvas, settings.dpi);
           await triggerDownloadBlob(pngBlob, filename);

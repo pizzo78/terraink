@@ -236,7 +236,8 @@
   color: rgba(218, 238, 250, 0.94);
 }
 
-.export-modal-option--share.is-copied {
+.export-modal-option--share.is-copied,
+.export-modal-option--share.is-limited {
   background: rgba(42, 126, 79, 0.92);
   border-color: rgba(120, 221, 161, 0.52);
   color: #effff5;
@@ -251,6 +252,50 @@
 .export-modal-option-icon {
   width: 24px;
   height: 24px;
+}
+
+.export-modal-warning {
+  margin: -2px 0 2px;
+  padding: 8px 10px;
+  border: 1px solid rgba(246, 193, 119, 0.34);
+  border-radius: 8px;
+  background: rgba(71, 43, 12, 0.42);
+  color: #ffdba8;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.export-modal-advanced {
+  display: grid;
+  gap: 6px;
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(146, 176, 200, 0.18);
+}
+
+.export-modal-advanced-label {
+  margin: 0;
+  font-family: "Spline Sans Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(169, 197, 216, 0.7);
+}
+
+.export-modal-option--svg-layered {
+  min-height: 46px;
+  background: rgba(22, 41, 56, 0.84);
+  border-color: rgba(120, 221, 161, 0.26);
+  color: #dff7e8;
+}
+
+.export-modal-option--svg-layered small {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.72;
 }
 
 .export-modal-option-icon.is-spinning {

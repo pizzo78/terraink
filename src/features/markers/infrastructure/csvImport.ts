@@ -1,3 +1,5 @@
+import { MAX_MARKERS } from "@/features/markers/domain/constants";
+
 export interface MarkerCsvRow {
   label: string;
   lat: number;
@@ -9,7 +11,9 @@ export interface MarkerCsvImportResult {
   skippedRows: number;
 }
 
-const MAX_IMPORTED_MARKERS = 500;
+interface ParseMarkerCsvOptions {
+  maxMarkers?: number;
+}
 
 function parseCsvLine(line: string): string[] {
   const cells: string[] = [];
@@ -50,7 +54,14 @@ function getHeaderIndex(header: string[], names: string[]): number {
   );
 }
 
-export function parseMarkerCsv(text: string): MarkerCsvImportResult {
+export function parseMarkerCsv(
+  text: string,
+  options: ParseMarkerCsvOptions = {},
+): MarkerCsvImportResult {
+  const maxMarkers = Math.max(
+    0,
+    Math.min(Math.round(options.maxMarkers ?? MAX_MARKERS), MAX_MARKERS),
+  );
   const rows = String(text ?? "")
     .split(/\r?\n/)
     .map((line) => line.trim())
@@ -75,7 +86,7 @@ export function parseMarkerCsv(text: string): MarkerCsvImportResult {
   let skippedRows = 0;
 
   for (const row of dataRows) {
-    if (markers.length >= MAX_IMPORTED_MARKERS) {
+    if (markers.length >= maxMarkers) {
       skippedRows += 1;
       continue;
     }

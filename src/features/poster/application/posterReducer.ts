@@ -5,6 +5,7 @@ import type {
   MarkerItem,
 } from "@/features/markers/domain/types";
 import {
+  MAX_MARKERS,
   MAX_MARKER_SIZE,
   MIN_MARKER_SIZE,
 } from "@/features/markers/domain/constants";
@@ -294,17 +295,26 @@ export function posterReducer(
       };
 
     case "ADD_MARKER":
+      if (state.markers.length >= MAX_MARKERS) {
+        return state;
+      }
       return {
         ...state,
         markers: [...state.markers, action.marker],
       };
 
-    case "ADD_MARKERS":
+    case "ADD_MARKERS": {
+      const remainingSlots = Math.max(0, MAX_MARKERS - state.markers.length);
+      const nextMarkers = action.markers.slice(0, remainingSlots);
+      if (nextMarkers.length === 0) {
+        return state;
+      }
       return {
         ...state,
         form: { ...state.form, showMarkers: true },
-        markers: [...state.markers, ...action.markers],
+        markers: [...state.markers, ...nextMarkers],
       };
+    }
 
     case "UPDATE_MARKER":
       return {
@@ -525,6 +535,7 @@ export function restoreSharedPosterState(
 
   const markers = Array.isArray(payload.markers)
     ? payload.markers
+        .slice(0, MAX_MARKERS)
         .map((marker, index): MarkerItem | null => {
           if (!marker || typeof marker !== "object") {
             return null;

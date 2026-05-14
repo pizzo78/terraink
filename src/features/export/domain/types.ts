@@ -1,4 +1,4 @@
-export type ExportFormat = "png" | "pdf" | "svg";
+export type ExportFormat = "png" | "pdf" | "svg" | "svg-layered";
 
 export type ExportDpi = 150 | 300 | 600;
 
