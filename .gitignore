@@ -16,6 +16,7 @@ bun-debug.log*
 # Test and coverage output
 coverage/
 *.lcov
+.tmp-tests/
 
 # Caches
 .vite/

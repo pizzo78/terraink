@@ -5,10 +5,14 @@
   "type": "module",
   "license": "AGPL-3.0-only",
   "scripts": {
-    "dev": "bunx --bun vite --host",
-    "build": "bunx --bun vite build",
-    "preview": "bunx --bun vite preview --host",
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "format:check": "node scripts/check-format.mjs",
+    "lint": "node scripts/lint-source.mjs",
+    "test": "node scripts/run-tests.mjs",
     "typecheck": "tsc --noEmit",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
     "showcase:grid": "node scripts/combine-showcase-grid.mjs"
   },
   "dependencies": {

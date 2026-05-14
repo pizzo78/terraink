@@ -187,6 +187,62 @@ function HelpUsGrowSection({
 
 /* ── main panel ── */
 
+function MapAttributionSection() {
+  return (
+    <section className="info-panel-section">
+      <h3>Map Data & Licenses</h3>
+      <p>
+        PosterEngine uses OpenStreetMap data, OpenMapTiles schema, OpenFreeMap
+        tile hosting, Nominatim geocoding, and MapLibre rendering. PosterEngine
+        credits on exported posters are optional, but map data attribution remains
+        separate from PosterEngine branding.
+      </p>
+      <div className="footer-links">
+        <a
+          className="footer-link"
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noreferrer"
+        >
+          OpenStreetMap
+        </a>
+        <a
+          className="footer-link"
+          href="https://openmaptiles.org/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          OpenMapTiles
+        </a>
+        <a
+          className="footer-link"
+          href="https://openfreemap.org/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          OpenFreeMap
+        </a>
+        <a
+          className="footer-link"
+          href="https://nominatim.openstreetmap.org/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Nominatim
+        </a>
+        <a
+          className="footer-link"
+          href="https://maplibre.org/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          MapLibre
+        </a>
+      </div>
+    </section>
+  );
+}
+
 export default function InfoPanel() {
   const repoUrl = String(REPO_URL ?? "").trim();
   const { repoStars, repoStarsLoading } = useRepoStars(REPO_API_URL);
@@ -199,6 +255,7 @@ export default function InfoPanel() {
           repoStars={repoStars}
           repoStarsLoading={repoStarsLoading}
         />
+        <MapAttributionSection />
       </div>
     </aside>
   );
