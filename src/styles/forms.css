@@ -1098,6 +1098,107 @@ button.color-editor-target:focus-visible {
   z-index: 2;
 }
 
+.theme-card-preview {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 78% 20%,
+      var(--theme-preview-landcover) 0 13%,
+      transparent 14%
+    ),
+    var(--theme-preview-land);
+  overflow: hidden;
+}
+
+.theme-card-preview > span {
+  position: absolute;
+  display: block;
+}
+
+.theme-preview-water {
+  left: -8%;
+  top: 18%;
+  width: 62%;
+  height: 30%;
+  border-radius: 0 999px 999px 0;
+  background: var(--theme-preview-water);
+  transform: rotate(-13deg);
+}
+
+.theme-preview-park {
+  border-radius: 999px;
+  background: var(--theme-preview-parks);
+  opacity: 0.96;
+}
+
+.theme-preview-park--one {
+  left: 55%;
+  top: 22%;
+  width: 34%;
+  height: 24%;
+}
+
+.theme-preview-park--two {
+  left: 8%;
+  top: 58%;
+  width: 32%;
+  height: 20%;
+}
+
+.theme-preview-building {
+  width: 10%;
+  height: 12%;
+  border-radius: 2px;
+  background: var(--theme-preview-buildings);
+  opacity: 0.9;
+}
+
+.theme-preview-building--one {
+  left: 52%;
+  top: 56%;
+}
+
+.theme-preview-building--two {
+  left: 65%;
+  top: 58%;
+}
+
+.theme-preview-building--three {
+  left: 78%;
+  top: 54%;
+}
+
+.theme-preview-road {
+  left: -12%;
+  right: -12%;
+  border-radius: 999px;
+  transform-origin: center;
+}
+
+.theme-preview-road--major {
+  top: 48%;
+  height: 7px;
+  background: var(--theme-preview-road-major);
+  transform: rotate(-18deg);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.theme-preview-road--mid {
+  top: 40%;
+  height: 4px;
+  background: var(--theme-preview-road-mid);
+  transform: rotate(24deg);
+}
+
+.theme-preview-road--minor {
+  top: 63%;
+  height: 3px;
+  background: var(--theme-preview-text);
+  opacity: 0.72;
+  transform: rotate(8deg);
+}
+
 .theme-card-palette {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
