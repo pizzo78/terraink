@@ -24,8 +24,8 @@ The codebase is split into vertical feature slices under `src/features/`, each w
 ```text
 src/features/
   export/     install/    layout/     location/
-  map/        markers/    poster/     share/
-  theme/      updates/
+  map/        markers/    poster/     presets/
+  share/      theme/      updates/    variations/
 ```
 
 Cross-cutting concerns live outside features:
@@ -65,6 +65,8 @@ Cross-cutting concerns live outside features:
 | `useLocationAutocomplete` | location | debounced search with stale-result guard |
 | `useCurrentLocation` | location | GPS plus reverse-geocode shared handler |
 | `useExport` | export | poster export orchestration |
+| `usePosterPresets` | presets | quick preset application |
+| `usePosterVariations` | variations | generate and apply theme/layout combinations |
 | `usePosterShareLink` | share | create and copy shareable poster URLs |
 | `useInstallPrompt` | install | PWA install prompt |
 | `useAnnouncementRelease` | updates | update release loading and last-seen tracking |

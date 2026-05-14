@@ -11,11 +11,15 @@ The repository may still appear under the historical `terraink` name in some too
 - Custom city map posters for any location in the world
 - Location search and reverse geocoding through Nominatim
 - Curated map themes with custom color overrides
+- Lightweight theme previews and a local palette assistant
 - Layer controls for landcover, buildings, water, parks, roads, rail, and aeroway
-- Marker placement with built-in and uploaded marker icons
+- Quick presets for print posters, wallpapers, and social formats
+- Marker placement with built-in, uploaded, and CSV-imported marker icons
+- Route overlay between markers for trips, events, and itineraries
 - Shareable poster links for saving or sending a design
-- Typography controls for poster labels and Google Fonts
-- High-resolution PNG, PDF, and layered SVG export
+- Typography controls for poster labels, coordinates, text scale, and Google Fonts
+- High-resolution PNG, print-ready PDF, and layered SVG export
+- Static showcase pages for SEO-friendly discovery
 - PWA support with a small service worker for static assets and map tiles
 
 ## Mapping Stack
