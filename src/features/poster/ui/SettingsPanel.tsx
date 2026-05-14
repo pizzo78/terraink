@@ -11,6 +11,7 @@ import MapSettingsSection from "@/features/map/ui/MapSettingsSection";
 import LayersSection from "@/features/map/ui/LayersSection";
 import MarkersSection from "@/features/markers/ui/MarkersSection";
 import TypographySection from "@/features/poster/ui/TypographySection";
+import PresetQuickBar from "@/features/presets/ui/PresetQuickBar";
 import {
   LocationIcon,
   ThemeIcon,
@@ -105,6 +106,8 @@ export default function SettingsPanel({
 
   return (
     <form className="settings-panel" onSubmit={(e) => e.preventDefault()}>
+      {!isAuxEditorActive ? <PresetQuickBar /> : null}
+
       <div
         className={`mobile-section mobile-section--location accordion-item${openSections.has("location") ? " accordion-item--open" : ""}`}
       >
