@@ -12,6 +12,7 @@ import {
   buildDynamicColorChoices,
   createFallbackThemeOption,
 } from "@/features/theme/domain/colorSuggestions";
+import { createAssistedPaletteOverrides } from "@/features/theme/domain/paletteAssistant";
 import LayoutCard from "@/features/layout/ui/LayoutCard";
 import MapDimensionFields from "./MapDimensionFields";
 import ColorPicker from "@/features/theme/ui/ColorPicker";
@@ -247,6 +248,13 @@ export default function MapSettingsSection({
     onColorChange(key, originalColor);
   }
 
+  function handleApplyAssistedPalette(seedColor: string) {
+    const overrides = createAssistedPaletteOverrides(seedColor);
+    Object.entries(overrides).forEach(([key, color]) => {
+      onColorChange(key, color);
+    });
+  }
+
   const hasCustomColors = useMemo(
     () =>
       DISPLAY_PALETTE_KEYS.some((key) => {
@@ -351,6 +359,13 @@ export default function MapSettingsSection({
                 onResetColor={() => handleResetSingleColor(editorKey)}
                 canResetColor={canResetEditorColor}
               />
+              <button
+                type="button"
+                className="theme-palette-assist-btn"
+                onClick={() => handleApplyAssistedPalette(editorColor)}
+              >
+                Apply Palette
+              </button>
             </section>
           ) : (
             <ThemeColorEditor

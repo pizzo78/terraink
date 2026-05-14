@@ -1382,6 +1382,26 @@ button.color-editor-target:focus-visible {
   min-width: 0;
 }
 
+.theme-palette-assist-btn {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 10px;
+  border: 1px solid rgba(120, 221, 161, 0.34);
+  border-radius: 8px;
+  background: rgba(42, 126, 79, 0.24);
+  color: #effff5;
+  font-family: "Spline Sans Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.theme-palette-assist-btn:hover,
+.theme-palette-assist-btn:focus-visible {
+  border-color: rgba(120, 221, 161, 0.58);
+  background: rgba(42, 126, 79, 0.38);
+}
+
 .theme-summary-footer .theme-customize-btn {
   margin: 0;
   flex: 0 0 auto;
