@@ -1,6 +1,6 @@
 import { localStorageCache } from "@/core/cache/localStorageCache";
 
-const EXPORT_COUNT_STORAGE_KEY = "terraink.poster.count";
+const EXPORT_COUNT_STORAGE_KEY = "posterengine.poster.count";
 const EXPORT_COUNT_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 
 export function readPosterExportCount(): number {

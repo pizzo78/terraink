@@ -33,7 +33,7 @@ export interface SupportPromptState {
   variant: SupportPromptVariant;
 }
 
-export const SUPPORT_PROMPT_EVENT = "terraink:support-prompt";
+export const SUPPORT_PROMPT_EVENT = "posterengine:support-prompt";
 
 /**
  * Provides handlers for exporting the live poster preview as PNG or PDF.

@@ -1,10 +1,12 @@
+name: posterengine
+
 services:
-  terraink:
+  posterengine:
     build:
       context: .
       dockerfile: Dockerfile
-    image: terraink:latest
-    container_name: terraink
+    image: posterengine:latest
+    container_name: posterengine
     ports:
       - "${APP_PORT:-7203}:80"
     healthcheck:

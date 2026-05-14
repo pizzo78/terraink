@@ -23,6 +23,10 @@ const checkedExtensions = new Set([
 ]);
 const forbiddenPatterns = [
   {
+    pattern: new RegExp(["terra", "ink"].join(""), "i"),
+    message: "Remove references to the legacy project name.",
+  },
+  {
     pattern: /%VITE_GOOGLE_SITE_VERIFICATION%/,
     message: "Use the PosterEngine fallback placeholder instead of a raw Vite env token.",
   },

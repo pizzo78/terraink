@@ -1,7 +1,7 @@
 import type { MarkerIconDefinition } from "@/features/markers/domain/types";
 import { MAX_CUSTOM_MARKER_ICONS } from "@/features/markers/domain/constants";
 
-const DB_NAME = "terraink-markers";
+const DB_NAME = "posterengine-markers";
 const STORE_NAME = "custom-icons";
 const DB_VERSION = 1;
 const STORAGE_KEY = "icons";

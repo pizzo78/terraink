@@ -2,9 +2,7 @@
 
 # PosterEngine
 
-PosterEngine is a lightweight browser app for creating custom map posters and wallpapers from real OpenStreetMap data. Pick a location, tune the map style, adjust the poster layout, add optional markers, then export a print-ready PNG, PDF, or layered SVG.
-
-The repository may still appear under the historical `terraink` name in some tooling, but the product branding to preserve is **PosterEngine**.
+PosterEngine is a lightweight browser app for creating custom map posters and wallpapers from real OpenStreetMap data. Pick a location, tune the map style, adjust the poster layout, add optional markers, then export a print-ready PNG, PDF, SVG, or layered SVG.
 
 ## Features
 
@@ -62,6 +60,12 @@ Check [`.env.example`](./.env.example) for available variables. They are optiona
 bun run build
 ```
 
+Run the full local verification pipeline:
+
+```bash
+bun run verify
+```
+
 ## Docker
 
 Build and run with Docker Compose:
@@ -106,7 +110,7 @@ Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a PR.
 
 - Branch from `dev` and target `dev` when that branch is available.
 - Keep changes focused and aligned with the architecture.
-- Run `bun install` and `bun run build` before submitting changes.
+- Run `bun install` and `bun run verify` before submitting changes.
 - Include screenshots or a demo for visible UI changes.
 
 ## License
@@ -125,4 +129,4 @@ If you deploy or modify the open-source version, you are responsible for complyi
 
 ## Acknowledgment
 
-PosterEngine evolved from the historical Terraink codebase and was inspired by [MapToPoster](https://github.com/originalankur/maptoposter) by [Ankur Gupta](https://github.com/originalankur), originally released under the MIT license.
+PosterEngine was inspired by [MapToPoster](https://github.com/originalankur/maptoposter) by [Ankur Gupta](https://github.com/originalankur), originally released under the MIT license.

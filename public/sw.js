@@ -1,5 +1,5 @@
-const CACHE_NAME = "terraink-static-v2";
-const TILE_CACHE_NAME = "terraink-tiles-v2";
+const CACHE_NAME = "posterengine-static-v1";
+const TILE_CACHE_NAME = "posterengine-tiles-v1";
 const TILE_ORIGINS = ["https://tiles.openfreemap.org"];
 const MAX_TILE_CACHE_ENTRIES = 800;
 const APP_SHELL_ASSETS = [

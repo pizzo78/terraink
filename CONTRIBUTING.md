@@ -5,8 +5,8 @@ This guide keeps contributions focused, reviewable, and consistent with the app 
 ## Getting Started
 
 ```bash
-git clone https://github.com/pizzo78/terraink.git
-cd terraink
+git clone https://github.com/pizzo78/posterengine.git
+cd posterengine
 bun install
 bun run dev
 ```
@@ -31,7 +31,7 @@ When `dev` is available, create feature branches from `dev` and target pull requ
 2. Create a short descriptive branch such as `fix/geocoding-error` or `feat/svg-export`.
 3. Implement a focused diff.
 4. Run `bun install` if dependencies changed.
-5. Run `bun run build` before opening a PR.
+5. Run `bun run verify` before opening a PR.
 6. Add screenshots or a short demo for visible UI changes.
 
 ## Code Quality
