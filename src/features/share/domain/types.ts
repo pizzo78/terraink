@@ -32,6 +32,7 @@ export interface SharedMarker {
   iconId: string;
   size: number;
   color: string;
+  label?: string;
 }
 
 export interface SharedMarkerDefaults {

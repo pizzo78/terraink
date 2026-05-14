@@ -1775,6 +1775,45 @@ label.color-field-label {
   gap: 12px;
 }
 
+.marker-import-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.marker-import-input {
+  display: none;
+}
+
+.marker-import-btn {
+  min-height: 38px;
+  border: 1px solid rgba(146, 176, 200, 0.24);
+  border-radius: 8px;
+  background: rgba(17, 33, 47, 0.72);
+  color: rgba(218, 238, 250, 0.94);
+  padding: 0 12px;
+  font-family: "Spline Sans Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.marker-import-btn:hover,
+.marker-import-btn:focus-visible {
+  border-color: rgba(112, 184, 222, 0.72);
+  background: rgba(36, 62, 80, 0.94);
+}
+
+.marker-import-status {
+  min-width: 0;
+  overflow: hidden;
+  color: #9fbcd0;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .markers-section-head {
   display: flex;
   align-items: flex-start;

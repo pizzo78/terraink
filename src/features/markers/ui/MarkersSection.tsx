@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import type {
@@ -12,6 +12,7 @@ import {
   getUploadLabel,
 } from "@/features/markers/infrastructure/helpers";
 import { findMarkerIcon } from "@/features/markers/infrastructure/iconRegistry";
+import { parseMarkerCsv } from "@/features/markers/infrastructure/csvImport";
 import {
   DEFAULT_MARKER_SIZE,
   MAX_MARKER_SIZE,
@@ -131,6 +132,8 @@ export default function MarkersSection() {
   const [expandedMarkerId, setExpandedMarkerId] = useState<string | null>(null);
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [csvImportStatus, setCsvImportStatus] = useState("");
+  const csvInputRef = useRef<HTMLInputElement | null>(null);
   const markerThemeColor = effectiveTheme.ui.text;
   const hasMarkers = markers.length > 0;
   const isColorPickerFocused =
@@ -224,6 +227,35 @@ export default function MarkersSection() {
     [addMarker, dispatch],
   );
 
+  const handleImportCsvFile = useCallback(
+    async (file: File) => {
+      const text = await file.text();
+      const result = parseMarkerCsv(text);
+      if (result.markers.length === 0) {
+        setCsvImportStatus("No valid rows");
+        return;
+      }
+
+      dispatch({
+        type: "ADD_MARKERS",
+        markers: result.markers.map((marker) =>
+          createMarkerItem({
+            lat: marker.lat,
+            lon: marker.lon,
+            label: marker.label,
+            defaults: markerDefaults,
+          }),
+        ),
+      });
+      setCsvImportStatus(
+        result.skippedRows > 0
+          ? `Imported ${result.markers.length}, skipped ${result.skippedRows}`
+          : `Imported ${result.markers.length}`,
+      );
+    },
+    [dispatch, markerDefaults],
+  );
+
   const markerRows = useMemo(
     () => {
       const iconCounts = new Map<string, number>();
@@ -232,11 +264,12 @@ export default function MarkersSection() {
         const iconLabel = String(icon?.label ?? "Marker").trim() || "Marker";
         const nextCount = (iconCounts.get(iconLabel) ?? 0) + 1;
         iconCounts.set(iconLabel, nextCount);
+        const importedLabel = String(marker.label ?? "").trim();
         return {
           marker,
           index,
           icon,
-          markerLabel: `${iconLabel} ${nextCount}`,
+          markerLabel: importedLabel || `${iconLabel} ${nextCount}`,
           isExpanded: expandedMarkerId === marker.id,
         };
       });
@@ -435,18 +468,45 @@ export default function MarkersSection() {
 
       <div className="markers-section__content">
         {!isMarkerEditorActive && !isSettingsOpen ? (
-          <MarkerPicker
-            markerColor={markerDefaults.color}
-            customIcons={customMarkerIcons}
-            onIconClick={addMarker}
-            onUploadIcon={handleUploadIcon}
-            onRemoveUploadedIcon={(iconId) =>
-              dispatch({ type: "REMOVE_CUSTOM_MARKER_ICON", iconId })
-            }
-            onClearUploadedIcons={() =>
-              dispatch({ type: "CLEAR_CUSTOM_MARKER_ICONS" })
-            }
-          />
+          <>
+            <div className="marker-import-row">
+              <input
+                ref={csvInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="marker-import-input"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = "";
+                  if (file) {
+                    void handleImportCsvFile(file);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="marker-import-btn"
+                onClick={() => csvInputRef.current?.click()}
+              >
+                Import CSV
+              </button>
+              {csvImportStatus ? (
+                <span className="marker-import-status">{csvImportStatus}</span>
+              ) : null}
+            </div>
+            <MarkerPicker
+              markerColor={markerDefaults.color}
+              customIcons={customMarkerIcons}
+              onIconClick={addMarker}
+              onUploadIcon={handleUploadIcon}
+              onRemoveUploadedIcon={(iconId) =>
+                dispatch({ type: "REMOVE_CUSTOM_MARKER_ICON", iconId })
+              }
+              onClearUploadedIcons={() =>
+                dispatch({ type: "CLEAR_CUSTOM_MARKER_ICONS" })
+              }
+            />
+          </>
         ) : null}
 
         {!isMarkerEditorActive && isSettingsOpen ? (

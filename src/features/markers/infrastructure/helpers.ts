@@ -29,6 +29,7 @@ export function createMarkerItem(input: {
   lon: number;
   defaults: MarkerDefaults;
   iconId?: string;
+  label?: string;
 }): MarkerItem {
   return {
     id: createId("marker"),
@@ -37,6 +38,7 @@ export function createMarkerItem(input: {
     iconId: input.iconId ?? featuredMarkerIcons[0]?.id ?? predefinedMarkerIcons[0].id,
     size: input.defaults.size ?? DEFAULT_MARKER_SIZE,
     color: input.defaults.color ?? DEFAULT_MARKER_COLOR,
+    label: input.label,
   };
 }
 

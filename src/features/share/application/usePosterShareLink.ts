@@ -35,6 +35,7 @@ function buildShareableMarkers(state: PosterState): SharedMarker[] {
     iconId: customIconIds.has(marker.iconId) ? "pin" : marker.iconId,
     size: Math.round(marker.size),
     color: marker.color,
+    label: marker.label,
   }));
 }
 

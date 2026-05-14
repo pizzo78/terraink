@@ -128,6 +128,7 @@ export type PosterAction =
   | { type: "SET_MARKER_EDITOR_ACTIVE"; active: boolean }
   | { type: "SET_ACTIVE_MARKER"; markerId: string | null }
   | { type: "ADD_MARKER"; marker: MarkerItem }
+  | { type: "ADD_MARKERS"; markers: MarkerItem[] }
   | { type: "UPDATE_MARKER"; markerId: string; changes: Partial<MarkerItem> }
   | { type: "REMOVE_MARKER"; markerId: string }
   | { type: "CLEAR_MARKERS" }
@@ -286,6 +287,13 @@ export function posterReducer(
       return {
         ...state,
         markers: [...state.markers, action.marker],
+      };
+
+    case "ADD_MARKERS":
+      return {
+        ...state,
+        form: { ...state.form, showMarkers: true },
+        markers: [...state.markers, ...action.markers],
       };
 
     case "UPDATE_MARKER":
@@ -517,6 +525,10 @@ export function restoreSharedPosterState(
 
           const markerSize = Number(sharedMarker.size);
           const markerColor = normalizeSharedHexColor(sharedMarker.color);
+          const markerLabel =
+            typeof sharedMarker.label === "string"
+              ? sharedMarker.label.trim().slice(0, 80)
+              : "";
 
           return {
             id: `shared-marker-${index}-${lat.toFixed(6)}-${lon.toFixed(6)}`,
@@ -527,6 +539,7 @@ export function restoreSharedPosterState(
               ? clamp(markerSize, MIN_MARKER_SIZE, MAX_MARKER_SIZE)
               : markerDefaults.size,
             color: markerColor ?? markerDefaults.color,
+            label: markerLabel || undefined,
           };
         })
         .filter((marker): marker is MarkerItem => marker !== null)
