@@ -7,4 +7,10 @@ services:
     container_name: terraink
     ports:
       - "${APP_PORT:-7203}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
