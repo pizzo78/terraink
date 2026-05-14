@@ -24,6 +24,8 @@ export interface ExportOptions {
   displayContinent?: string;
   fontFamily: string;
   showPosterText: boolean;
+  showCoordinates?: boolean;
+  textScale?: number;
   showOverlay?: boolean;
   showRoute?: boolean;
   routeColor?: string;

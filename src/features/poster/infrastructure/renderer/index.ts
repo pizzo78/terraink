@@ -28,6 +28,8 @@ export async function compositeExport(
     displayCountry,
     fontFamily,
     showPosterText = true,
+    showCoordinates = true,
+    textScale = 1,
     showOverlay = true,
     showRoute = false,
     routeColor,
@@ -94,6 +96,8 @@ export async function compositeExport(
     showPosterText,
     showOverlay,
     includeCredits,
+    showCoordinates,
+    textScale,
   );
 
   const size: CanvasSize = {

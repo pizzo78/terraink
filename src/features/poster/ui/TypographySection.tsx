@@ -36,6 +36,19 @@ export default function TypographySection({
           </span>
         </label>
         <label className="toggle-field">
+          <span>Coordinates</span>
+          <span className="theme-switch">
+            <input
+              type="checkbox"
+              name="showCoordinates"
+              checked={Boolean(form.showCoordinates)}
+              onChange={onChange}
+              disabled={!form.showPosterText}
+            />
+            <span className="theme-switch-track" aria-hidden="true" />
+          </span>
+        </label>
+        <label className="toggle-field">
           <span>Overlay layer</span>
           <span className="theme-switch">
             <input
@@ -50,7 +63,7 @@ export default function TypographySection({
 
         <div className="field-grid keep-two-mobile">
           <label>
-            Display city
+            Title
             <input
               className="form-control-tall"
               name="displayCity"
@@ -60,7 +73,7 @@ export default function TypographySection({
             />
           </label>
           <label>
-            Display country
+            Subtitle
             <input
               className="form-control-tall"
               name="displayCountry"
@@ -70,6 +83,22 @@ export default function TypographySection({
             />
           </label>
         </div>
+        <label className="text-scale-field">
+          <span>
+            Text Size
+            <strong>{form.textScale}%</strong>
+          </span>
+          <input
+            className="text-scale-slider"
+            type="range"
+            name="textScale"
+            min="70"
+            max="130"
+            step="5"
+            value={form.textScale}
+            onChange={onChange}
+          />
+        </label>
         <label>
           Font
           <select

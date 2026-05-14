@@ -166,6 +166,7 @@ export default function PreviewPanel() {
   const aspect = widthCm / heightCm;
   const formLat = Number(form.latitude) || 0;
   const formLon = Number(form.longitude) || 0;
+  const textScale = (Number(form.textScale) || 100) / 100;
   const layoutOption =
     getLayoutOption(form.layout) ?? createCustomLayoutOption(widthCm, heightCm);
   const posterSizeLabel = formatLayoutDimensions(layoutOption);
@@ -436,6 +437,8 @@ export default function PreviewPanel() {
             textColor={effectiveTheme.ui.text}
             landColor={effectiveTheme.map.land}
             showPosterText={form.showPosterText}
+            showCoordinates={form.showCoordinates}
+            textScale={textScale}
             includeCredits={form.includeCredits}
             showOverlay={form.showMarkers}
           />

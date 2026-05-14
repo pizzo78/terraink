@@ -8,6 +8,8 @@ export const posterPresets: PosterPreset[] = [
     form: {
       distance: "8500",
       showPosterText: true,
+      showCoordinates: true,
+      textScale: "100",
       includeCredits: true,
       includeLandcover: true,
       includeBuildings: true,
@@ -37,6 +39,8 @@ export const posterPresets: PosterPreset[] = [
     form: {
       distance: "7000",
       showPosterText: false,
+      showCoordinates: false,
+      textScale: "95",
       includeCredits: false,
       includeLandcover: true,
       includeBuildings: false,
@@ -66,6 +70,8 @@ export const posterPresets: PosterPreset[] = [
     form: {
       distance: "6500",
       showPosterText: true,
+      showCoordinates: false,
+      textScale: "105",
       includeCredits: false,
       includeLandcover: true,
       includeBuildings: false,
@@ -95,6 +101,8 @@ export const posterPresets: PosterPreset[] = [
     form: {
       distance: "11000",
       showPosterText: false,
+      showCoordinates: false,
+      textScale: "95",
       includeCredits: false,
       includeLandcover: true,
       includeBuildings: false,

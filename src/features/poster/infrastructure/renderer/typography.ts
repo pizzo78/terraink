@@ -30,6 +30,8 @@ export function drawPosterText(
   showPosterText: boolean,
   showOverlay: boolean,
   includeCredits: boolean = false,
+  showCoordinates: boolean = true,
+  textScale: number = 1,
 ): void {
   const textColor = theme.ui?.text || "#111111";
   const landColor = theme.map?.land || "#808080";
@@ -45,7 +47,7 @@ export function drawPosterText(
   const dimScale = Math.max(
     0.45,
     Math.min(width, height) / TEXT_DIMENSION_REFERENCE_PX,
-  );
+  ) * Math.max(0.7, Math.min(1.3, textScale));
   const attributionFontSize = ATTRIBUTION_FONT_BASE_PX * dimScale;
 
   if (showPosterText) {
@@ -75,14 +77,16 @@ export function drawPosterText(
     ctx.font = `300 ${countryFontSize}px ${titleFontFamily}`;
     ctx.fillText(country.toUpperCase(), width * 0.5, countryY);
 
-    ctx.globalAlpha = 0.75;
-    ctx.font = `400 ${coordinateFontSize}px ${bodyFontFamily}`;
-    ctx.fillText(
-      formatCoordinates(center.lat, center.lon),
-      width * 0.5,
-      coordinatesY,
-    );
-    ctx.globalAlpha = 1;
+    if (showCoordinates) {
+      ctx.globalAlpha = 0.75;
+      ctx.font = `400 ${coordinateFontSize}px ${bodyFontFamily}`;
+      ctx.fillText(
+        formatCoordinates(center.lat, center.lon),
+        width * 0.5,
+        coordinatesY,
+      );
+      ctx.globalAlpha = 1;
+    }
   }
   /*
   ctx.fillStyle = attributionColor;

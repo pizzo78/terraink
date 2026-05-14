@@ -25,6 +25,8 @@ interface PosterTextOverlayProps {
   textColor: string;
   landColor: string;
   showPosterText: boolean;
+  showCoordinates: boolean;
+  textScale: number;
   includeCredits: boolean;
   showOverlay: boolean;
 }
@@ -43,6 +45,8 @@ export default function PosterTextOverlay({
   textColor,
   landColor,
   showPosterText,
+  showCoordinates,
+  textScale,
   includeCredits,
   showOverlay,
 }: PosterTextOverlayProps) {
@@ -56,9 +60,10 @@ export default function PosterTextOverlay({
     : '"IBM Plex Mono", monospace';
 
   const cityLabel = formatCityLabel(city);
-  const cityFontSize = `${toCqMin(CITY_FONT_BASE_PX) * computeCityFontScale(city)}cqmin`;
-  const countryFontSize = `${toCqMin(COUNTRY_FONT_BASE_PX)}cqmin`;
-  const coordsFontSize = `${toCqMin(COORDS_FONT_BASE_PX)}cqmin`;
+  const scale = Math.max(0.7, Math.min(1.3, textScale));
+  const cityFontSize = `${toCqMin(CITY_FONT_BASE_PX) * computeCityFontScale(city) * scale}cqmin`;
+  const countryFontSize = `${toCqMin(COUNTRY_FONT_BASE_PX) * scale}cqmin`;
+  const coordsFontSize = `${toCqMin(COORDS_FONT_BASE_PX) * scale}cqmin`;
   const attributionFontSize = `${toCqMin(ATTRIBUTION_FONT_BASE_PX)}cqmin`;
   const attributionColor = computeAttributionColor(textColor, landColor, showOverlay);
   const attributionOpacity = showOverlay ? 0.55 : 0.9;
@@ -94,16 +99,18 @@ export default function PosterTextOverlay({
           >
             {country.toUpperCase()}
           </p>
-          <p
-            className="poster-coords"
-            style={{
-              fontFamily: bodyFont,
-              top: `${TEXT_COORDS_Y_RATIO * 100}%`,
-              fontSize: coordsFontSize,
-            }}
-          >
-            {formatCoordinates(lat, lon)}
-          </p>
+          {showCoordinates ? (
+            <p
+              className="poster-coords"
+              style={{
+                fontFamily: bodyFont,
+                top: `${TEXT_COORDS_Y_RATIO * 100}%`,
+                fontSize: coordsFontSize,
+              }}
+            >
+              {formatCoordinates(lat, lon)}
+            </p>
+          ) : null}
         </>
       )}
       {/*

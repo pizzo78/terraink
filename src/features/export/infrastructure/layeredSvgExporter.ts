@@ -27,6 +27,8 @@ interface LayeredSvgOptions {
   displayCountry: string;
   fontFamily?: string;
   showPosterText: boolean;
+  showCoordinates?: boolean;
+  textScale?: number;
   showOverlay: boolean;
   showRoute?: boolean;
   routeColor?: string;
@@ -83,6 +85,8 @@ export async function createLayeredSvgBlobFromMap({
   displayCountry,
   fontFamily,
   showPosterText,
+  showCoordinates = true,
+  textScale = 1,
   showOverlay,
   showRoute = false,
   routeColor,
@@ -227,6 +231,8 @@ export async function createLayeredSvgBlobFromMap({
           showPosterText,
           showOverlay,
           includeCredits,
+          showCoordinates,
+          textScale,
         );
       }),
     });

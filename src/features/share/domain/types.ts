@@ -12,6 +12,8 @@ export interface SharedPosterForm {
   displayContinent?: string;
   fontFamily?: string;
   showPosterText?: boolean;
+  showCoordinates?: boolean;
+  textScale?: string;
   includeCredits?: boolean;
   includeLandcover?: boolean;
   includeBuildings?: boolean;

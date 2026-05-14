@@ -35,6 +35,8 @@ const POSTER_FORM_SHARE_KEYS = new Set([
   "displayContinent",
   "fontFamily",
   "showPosterText",
+  "showCoordinates",
+  "textScale",
   "includeCredits",
   "includeLandcover",
   "includeBuildings",
@@ -71,6 +73,8 @@ export interface PosterForm {
   displayContinent: string;
   fontFamily: string;
   showPosterText: boolean;
+  showCoordinates: boolean;
+  textScale: string;
   includeCredits: boolean;
   includeLandcover: boolean;
   includeBuildings: boolean;
@@ -154,10 +158,14 @@ export function posterReducer(
 ): PosterState {
   switch (action.type) {
     case "SET_FIELD": {
-      const nextForm = { ...state.form, [action.name]: action.value };
+      const fieldValue =
+        action.name === "textScale" && typeof action.value === "string"
+          ? String(clamp(Number(action.value) || 100, 70, 130))
+          : action.value;
+      const nextForm = { ...state.form, [action.name]: fieldValue };
       const nextDisplayNameOverrides = { ...state.displayNameOverrides };
 
-      if (action.name === "location" && typeof action.value === "string") {
+      if (action.name === "location" && typeof fieldValue === "string") {
         nextDisplayNameOverrides.city = false;
         nextDisplayNameOverrides.country = false;
       }
@@ -447,6 +455,10 @@ function normalizeSharedFormFields(
       POSTER_FORM_SHARE_KEYS.has(key) &&
       (typeof value === "string" || typeof value === "boolean")
     ) {
+      if (key === "textScale" && typeof value === "string") {
+        nextFields.textScale = String(clamp(Number(value) || 100, 70, 130));
+        continue;
+      }
       (nextFields as Record<string, string | boolean>)[key] = value;
     }
   }

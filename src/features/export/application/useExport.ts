@@ -111,6 +111,7 @@ export function useExport() {
 
         const lat = Number(form.latitude) || 0;
         const lon = Number(form.longitude) || 0;
+        const textScale = (Number(form.textScale) || 100) / 100;
 
         if (format === "svg") {
           const svgBlob = await createLayeredSvgBlobFromMap({
@@ -123,6 +124,8 @@ export function useExport() {
             displayCountry: form.displayCountry || "",
             fontFamily: form.fontFamily.trim(),
             showPosterText: form.showPosterText,
+            showCoordinates: form.showCoordinates,
+            textScale,
             showOverlay: form.showMarkers,
             showRoute: hasVisibleRoute,
             routeColor: effectiveTheme.ui.text,
@@ -162,6 +165,8 @@ export function useExport() {
           displayCountry: form.displayCountry || "",
           fontFamily: form.fontFamily.trim(),
           showPosterText: form.showPosterText,
+          showCoordinates: form.showCoordinates,
+          textScale,
           showOverlay: form.showMarkers,
           showRoute: hasVisibleRoute,
           routeColor: effectiveTheme.ui.text,
