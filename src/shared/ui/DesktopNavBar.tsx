@@ -4,6 +4,7 @@ import {
   LayoutIcon,
   LayersIcon,
   MarkersIcon,
+  PresetsIcon,
   StyleIcon,
   SettingsIcon,
 } from "./Icons";
@@ -19,6 +20,7 @@ const tabs: {
   { id: "style", label: "Style", Icon: StyleIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
   { id: "markers", label: "Markers", Icon: MarkersIcon },
+  { id: "presets", label: "Presets", Icon: PresetsIcon },
 ];
 
 interface DesktopNavBarProps {

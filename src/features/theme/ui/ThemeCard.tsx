@@ -31,26 +31,24 @@ export default function ThemeCard({
         "map.roads.minor_high",
         "map.roads.minor_mid",
       ];
-  const majorPaletteIndices = majorPaletteKeys
-    .map((key) => DISPLAY_PALETTE_KEYS.indexOf(key))
-    .filter((index) => index >= 0);
+  const paletteByKey = (key: ThemeColorKey, fallback: string) => {
+    const color = themeOption.palette?.[DISPLAY_PALETTE_KEYS.indexOf(key)];
+    return color || fallback;
+  };
   const palette = (() => {
-    if (!Array.isArray(themeOption.palette)) return [];
     const seen = new Set<string>();
     const result: string[] = [];
-    for (const index of majorPaletteIndices) {
-      const color = themeOption.palette[index];
+    for (const key of majorPaletteKeys) {
+      const color = paletteByKey(key, "");
       if (color && !seen.has(color)) {
         seen.add(color);
         result.push(color);
       }
     }
-    return result;
+    return result.length > 0
+      ? result
+      : ["#0d1f2e", "#e7f2fb", "#5eaed4", "#78dda1", "#f6c177"];
   })();
-  const paletteByKey = (key: ThemeColorKey, fallback: string) => {
-    const color = themeOption.palette?.[DISPLAY_PALETTE_KEYS.indexOf(key)];
-    return color || fallback;
-  };
   const previewStyle = {
     "--theme-preview-land": paletteByKey("map.land", "#d8d3c6"),
     "--theme-preview-landcover": paletteByKey("map.landcover", "#cfd7c2"),
@@ -84,18 +82,19 @@ export default function ThemeCard({
         <span className="theme-preview-road theme-preview-road--mid" />
         <span className="theme-preview-road theme-preview-road--minor" />
       </div>
-      {showFullPalette ? (
-        <div className="theme-card-palette theme-card-palette--full" aria-hidden="true">
-          {palette.map((color, index) => (
-            <span
-              key={`${themeOption.id}-${color}-${index}`}
-              className="theme-card-swatch"
-              style={{ backgroundColor: color }}
-              title={color}
-            />
-          ))}
-        </div>
-      ) : null}
+      <div
+        className={`theme-card-palette${showFullPalette ? " theme-card-palette--full" : ""}`}
+        aria-hidden="true"
+      >
+        {palette.map((color, index) => (
+          <span
+            key={`${themeOption.id}-${color}-${index}`}
+            className="theme-card-swatch"
+            style={{ backgroundColor: color }}
+            title={color}
+          />
+        ))}
+      </div>
       <span className="theme-card-name-shadow" aria-hidden="true" />
       <p className="theme-card-name">{themeOption.name}</p>
     </button>

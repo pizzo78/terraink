@@ -18,6 +18,7 @@ import {
   LayoutIcon,
   LayersIcon,
   MarkersIcon,
+  PresetsIcon,
   StyleIcon,
   ChevronDownIcon,
 } from "@/shared/ui/Icons";
@@ -37,6 +38,7 @@ type SectionId =
   | "layout"
   | "layers"
   | "markers"
+  | "presets"
   | "style";
 
 const accordionSections: {
@@ -49,6 +51,7 @@ const accordionSections: {
   { id: "layout", label: "Layout", Icon: LayoutIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
   { id: "markers", label: "Markers", Icon: MarkersIcon },
+  { id: "presets", label: "Presets", Icon: PresetsIcon },
   { id: "style", label: "Style", Icon: StyleIcon },
 ];
 
@@ -68,7 +71,6 @@ export default function SettingsPanel({
     handleLocationSelect,
     handleClearLocation,
     setLocationFocused,
-    handleCreditsChange,
   } = useFormHandlers();
   const { locationSuggestions, isLocationSearching, searchNow } = useLocationAutocomplete(
     state.form.location,
@@ -106,8 +108,6 @@ export default function SettingsPanel({
 
   return (
     <form className="settings-panel" onSubmit={(e) => e.preventDefault()}>
-      {!isAuxEditorActive ? <PresetQuickBar /> : null}
-
       <div
         className={`mobile-section mobile-section--location accordion-item${openSections.has("location") ? " accordion-item--open" : ""}`}
       >
@@ -264,12 +264,31 @@ export default function SettingsPanel({
       </div>
 
       <div
+        className={`mobile-section mobile-section--presets accordion-item${openSections.has("presets") ? " accordion-item--open" : ""}`}
+      >
+        <AccordionHeader
+          sectionId="presets"
+          label={accordionSections[5].label}
+          Icon={accordionSections[5].Icon}
+          isOpen={openSections.has("presets")}
+          onToggle={toggleSection}
+        />
+        <div
+          className={`accordion-body${openSections.has("presets") ? " is-open" : ""}`}
+        >
+          <div className="accordion-body-inner">
+            {!isAuxEditorActive ? <PresetQuickBar /> : null}
+          </div>
+        </div>
+      </div>
+
+      <div
         className={`mobile-section mobile-section--style accordion-item${openSections.has("style") ? " accordion-item--open" : ""}`}
       >
         <AccordionHeader
           sectionId="style"
-          label={accordionSections[5].label}
-          Icon={accordionSections[5].Icon}
+          label={accordionSections[6].label}
+          Icon={accordionSections[6].Icon}
           isOpen={openSections.has("style")}
           onToggle={toggleSection}
         />

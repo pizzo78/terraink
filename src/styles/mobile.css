@@ -1442,6 +1442,11 @@
     display: none;
   }
 
+  /* Presets tab: show only presets and variations */
+  [data-mobile-tab="presets"] .mobile-section:not(.mobile-section--presets) {
+    display: none;
+  }
+
   /* Style tab: show only the style/typography section */
   [data-mobile-tab="style"] .mobile-section:not(.mobile-section--style) {
     display: none;

@@ -29,6 +29,7 @@ export { MdMyLocation as MyLocationIcon } from "react-icons/md";
 export { FiMapPin as LocationIcon } from "react-icons/fi";
 export { FiDroplet as ThemeIcon } from "react-icons/fi";
 export { FiLayout as LayoutIcon } from "react-icons/fi";
+export { FiGrid as PresetsIcon } from "react-icons/fi";
 export { FiType as StyleIcon } from "react-icons/fi";
 export { FiInfo as InfoIcon } from "react-icons/fi";
 export { FiLayers as LayersIcon } from "react-icons/fi";

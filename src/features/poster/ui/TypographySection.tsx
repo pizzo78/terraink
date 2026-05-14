@@ -60,6 +60,21 @@ export default function TypographySection({
             <span className="theme-switch-track" aria-hidden="true" />
           </span>
         </label>
+        <label className="toggle-field credits-toggle-field">
+          <span>Copyright</span>
+          <span className="theme-switch">
+            <input
+              type="checkbox"
+              name="includeCredits"
+              checked={Boolean(form.includeCredits)}
+              onChange={onChange}
+            />
+            <span className="theme-switch-track" aria-hidden="true" />
+          </span>
+        </label>
+        <p className="credits-hint">
+          Off removes the PosterEngine credit from previews and exports.
+        </p>
 
         <div className="field-grid keep-two-mobile">
           <label>
