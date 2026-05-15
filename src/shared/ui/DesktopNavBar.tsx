@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   LocationIcon,
   ThemeIcon,
@@ -29,6 +30,7 @@ interface DesktopNavBarProps {
   onTabChange: (tab: MobileTab) => void;
   isLocationVisible: boolean;
   onLocationToggle: () => void;
+  sidebarActions?: ReactNode;
 }
 
 export default function DesktopNavBar({
@@ -37,6 +39,7 @@ export default function DesktopNavBar({
   onTabChange,
   isLocationVisible,
   onLocationToggle,
+  sidebarActions,
 }: DesktopNavBarProps) {
   return (
     <nav className="desktop-nav-bar" aria-label="Settings sections">
@@ -66,6 +69,8 @@ export default function DesktopNavBar({
           <span className="desktop-nav-label">{label}</span>
         </button>
       ))}
+
+      {sidebarActions}
 
       <button
         type="button"

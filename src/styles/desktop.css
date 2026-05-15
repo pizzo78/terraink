@@ -25,6 +25,7 @@
 .desktop-nav-bar,
 .desktop-location-row-wrap,
 .desktop-settings-slide,
+.desktop-sidebar-actions,
 .desktop-export-fab,
 .desktop-install-badge,
 .desktop-settings-deco,
@@ -284,13 +285,70 @@
   }
 
   .desktop-nav-tab--settings {
-    margin-top: auto;
+    margin-top: 2px;
     margin-bottom: 6px;
     cursor: default;
   }
 
   .desktop-nav-tab--settings:disabled {
     opacity: 1;
+  }
+
+  .desktop-sidebar-actions {
+    width: 52px;
+    margin-top: auto;
+    display: grid;
+    gap: 4px;
+    padding: 6px 0;
+    border-top: 1px solid rgba(146, 176, 200, 0.1);
+  }
+
+  .desktop-sidebar-action {
+    width: 52px;
+    height: 42px;
+    margin: 0;
+    padding: 3px 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(180, 205, 225, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 0.46rem;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .desktop-sidebar-action svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .desktop-sidebar-action:hover:not(:disabled),
+  .desktop-sidebar-action:focus-visible,
+  .desktop-sidebar-action.is-active {
+    background: rgba(94, 174, 212, 0.1);
+    border-color: rgba(94, 174, 212, 0.22);
+    color: #9ee7f8;
+    transform: none;
+    filter: none;
+  }
+
+  .desktop-sidebar-action--pack {
+    background: rgba(42, 126, 79, 0.2);
+    border-color: rgba(120, 221, 161, 0.22);
+    color: #dfffee;
+  }
+
+  .desktop-sidebar-action:disabled {
+    opacity: 0.36;
+    cursor: default;
   }
 
   /* ── Desktop left panel: floating fixed container (location bar + settings) ── */

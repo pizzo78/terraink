@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { normalizeExportSettings } from "../src/features/export/domain/types";
 import { createFlatSvgBlobFromCanvas } from "../src/features/export/infrastructure/flatSvgExporter";
+import { createZipBlob } from "../src/features/export/infrastructure/zipExporter";
 import { parseMarkerCsv } from "../src/features/markers/infrastructure/csvImport";
 import {
   MAX_MARKERS,
@@ -214,4 +215,21 @@ function makeState(markerCount = 0): PosterState {
   assert.match(svg, /width="120"/);
   assert.match(svg, /height="80"/);
   assert.match(svg, /a&quot;b&lt;c&amp;d/);
+}
+
+{
+  const zip = await createZipBlob([
+    { name: "print.pdf", blob: new Blob(["pdf-data"]) },
+    { name: "preview.png", blob: new Blob(["png-data"]) },
+  ]);
+  const bytes = new Uint8Array(await zip.arrayBuffer());
+  const text = new TextDecoder().decode(bytes);
+
+  assert.equal(zip.type, "application/zip");
+  assert.equal(bytes[0], 0x50);
+  assert.equal(bytes[1], 0x4b);
+  assert.equal(bytes[2], 0x03);
+  assert.equal(bytes[3], 0x04);
+  assert.match(text, /print\.pdf/);
+  assert.match(text, /preview\.png/);
 }

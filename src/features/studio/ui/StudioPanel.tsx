@@ -7,23 +7,16 @@ import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { usePosterPresets } from "@/features/presets/application/usePosterPresets";
 import { usePosterVariations } from "@/features/variations/application/usePosterVariations";
 import { buildPreflightReport } from "@/features/preflight/domain/preflight";
-import { useExport } from "@/features/export/application/useExport";
 import {
   readLocalProjects,
   upsertLocalProject,
   writeLocalProjects,
   type LocalPosterProject,
 } from "@/features/projects/infrastructure/localProjectStorage";
-import { createMarkerItem } from "@/features/markers/infrastructure/helpers";
-import { MAX_MARKERS } from "@/features/markers/domain/constants";
 import {
   ArchiveIcon,
   BoxIcon,
   CheckIcon,
-  EyeIcon,
-  PackageIcon,
-  RotateLeftIcon,
-  RotateRightIcon,
   SaveIcon,
   ShuffleIcon,
   TrashIcon,
@@ -50,15 +43,14 @@ function getPosterName(city: string, fallback: string, count = 1): string {
 }
 
 export default function StudioPanel() {
-  const { state, dispatch, effectiveTheme, mapRef } = usePosterContext();
+  const { state, dispatch, effectiveTheme } = usePosterContext();
   const { presets, applyPreset } = usePosterPresets();
   const { variations, createVariations, applyVariation } = usePosterVariations();
-  const { exportPosterPack, isExporting, exportSettings } = useExport();
   const [projects, setProjects] = useState<LocalPosterProject[]>([]);
 
   const preflight = useMemo(
-    () => buildPreflightReport(state, effectiveTheme, exportSettings),
-    [state, effectiveTheme, exportSettings],
+    () => buildPreflightReport(state, effectiveTheme, state.exportSettings),
+    [state, effectiveTheme],
   );
 
   useEffect(() => {
@@ -95,28 +87,6 @@ export default function StudioPanel() {
     const nextProjects = projects.filter((project) => project.id !== projectId);
     writeLocalProjects(nextProjects);
     setProjects(nextProjects);
-  };
-
-  const addRouteWaypoint = () => {
-    if (state.markers.length >= MAX_MARKERS) {
-      dispatch({ type: "SET_ERROR", error: `Maximum ${MAX_MARKERS} markers reached.` });
-      return;
-    }
-
-    const center = mapRef.current?.getCenter();
-    const fallbackLat = Number(state.form.latitude);
-    const fallbackLon = Number(state.form.longitude);
-    const lat = center?.lat ?? (Number.isFinite(fallbackLat) ? fallbackLat : 0);
-    const lon = center?.lng ?? (Number.isFinite(fallbackLon) ? fallbackLon : 0);
-    dispatch({
-      type: "ADD_MARKER",
-      marker: createMarkerItem({
-        lat,
-        lon,
-        defaults: state.markerDefaults,
-        label: `Waypoint ${state.markers.length + 1}`,
-      }),
-    });
   };
 
   return (
@@ -222,89 +192,6 @@ export default function StudioPanel() {
               <small>{preset.description}</small>
             </button>
           ))}
-        </div>
-      </StudioBlock>
-
-      <StudioBlock title="Undo / Redo" icon={<RotateLeftIcon />}>
-        <div className="studio-action-row">
-          <button
-            type="button"
-            className="studio-command-btn"
-            onClick={() => dispatch({ type: "UNDO" })}
-            disabled={state.history.length === 0}
-          >
-            <RotateLeftIcon />
-            <span>Undo</span>
-          </button>
-          <button
-            type="button"
-            className="studio-command-btn"
-            onClick={() => dispatch({ type: "REDO" })}
-            disabled={state.future.length === 0}
-          >
-            <RotateRightIcon />
-            <span>Redo</span>
-          </button>
-        </div>
-      </StudioBlock>
-
-      <StudioBlock title="Export Pack" icon={<PackageIcon />}>
-        <button
-          type="button"
-          className="studio-command-btn studio-command-btn--wide"
-          onClick={() => void exportPosterPack()}
-          disabled={isExporting}
-        >
-          <PackageIcon />
-          <span>{isExporting ? "Exporting" : "Print Pack"}</span>
-        </button>
-      </StudioBlock>
-
-      <StudioBlock title="Route Poster" icon={<ArchiveIcon />}>
-        <div className="studio-action-row">
-          <button
-            type="button"
-            className="studio-command-btn"
-            onClick={addRouteWaypoint}
-            disabled={state.markers.length >= MAX_MARKERS}
-          >
-            <ArchiveIcon />
-            <span>Add Waypoint</span>
-          </button>
-          <button
-            type="button"
-            className="studio-command-btn"
-            onClick={() =>
-              dispatch({
-                type: "SET_FIELD",
-                name: "showRoute",
-                value: !state.form.showRoute,
-              })
-            }
-            disabled={state.markers.length < 2}
-          >
-            <CheckIcon />
-            <span>{state.form.showRoute ? "Hide Route" : "Show Route"}</span>
-          </button>
-        </div>
-      </StudioBlock>
-
-      <StudioBlock title="Mockup Preview" icon={<EyeIcon />}>
-        <div className="studio-segmented">
-          <button
-            type="button"
-            className={state.previewMode === "poster" ? "is-active" : ""}
-            onClick={() => dispatch({ type: "SET_PREVIEW_MODE", mode: "poster" })}
-          >
-            Poster
-          </button>
-          <button
-            type="button"
-            className={state.previewMode === "wall" ? "is-active" : ""}
-            onClick={() => dispatch({ type: "SET_PREVIEW_MODE", mode: "wall" })}
-          >
-            Wall
-          </button>
         </div>
       </StudioBlock>
 

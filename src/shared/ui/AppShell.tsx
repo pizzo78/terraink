@@ -26,6 +26,9 @@ const AnnouncementModal = lazy(
 );
 const ExportFab = lazy(() => import("@/features/export/ui/ExportFab"));
 const DesktopLocationBar = lazy(() => import("@/shared/ui/DesktopLocationBar"));
+const StudioSidebarActions = lazy(
+  () => import("@/features/studio/ui/StudioSidebarActions"),
+);
 
 function SettingsDrawer({
   mobileTab,
@@ -99,6 +102,7 @@ export default function AppShell() {
   useEffect(() => {
     const preload = () => {
       void import("@/features/poster/ui/SettingsPanel");
+      void import("@/features/studio/ui/StudioSidebarActions");
       void import("@/shared/ui/DesktopLocationBar");
       void import("@/features/export/ui/ExportFab");
       void import("@/features/updates/ui/AnnouncementModal");
@@ -208,6 +212,13 @@ export default function AppShell() {
         isLocationVisible={desktopLocationRowVisible}
         onLocationToggle={() =>
           setDesktopLocationRowVisible((isVisible) => !isVisible)
+        }
+        sidebarActions={
+          !isMobileViewport ? (
+            <Suspense fallback={null}>
+              <StudioSidebarActions />
+            </Suspense>
+          ) : null
         }
       />
 
