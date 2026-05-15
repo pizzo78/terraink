@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { usePosterContext } from "@/features/poster/ui/PosterContext";
+import { usePosterDispatch } from "@/features/poster/ui/PosterContext";
 import { formatLayoutCm } from "@/features/layout/domain/layoutMatcher";
 import { getLayoutOption } from "@/features/layout/infrastructure/layoutRepository";
 import {
@@ -8,7 +8,7 @@ import {
 } from "@/features/presets/infrastructure/presetRepository";
 
 export function usePosterPresets() {
-  const { dispatch } = usePosterContext();
+  const { dispatch } = usePosterDispatch();
 
   const applyPreset = useCallback(
     (presetId: string) => {

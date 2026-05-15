@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 
 const packageJson = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, "package.json"), "utf8"),
@@ -47,6 +48,39 @@ function googleVerificationFallbackPlugin(value) {
   };
 }
 
+function serviceWorkerPrecachePlugin() {
+  return {
+    name: "posterengine-service-worker-precache",
+    writeBundle(options, bundle) {
+      const buildAssetUrls = Object.values(bundle)
+        .map((item) => item.fileName)
+        .filter((fileName) => /\.(?:css|js)$/.test(fileName))
+        .map((fileName) => `/${fileName}`)
+        .sort();
+      const cacheVersion = crypto
+        .createHash("sha256")
+        .update([appVersion, ...buildAssetUrls].join("\n"))
+        .digest("hex")
+        .slice(0, 12);
+      const outDir = path.resolve(__dirname, options.dir || "dist");
+      const swSourcePath = path.resolve(__dirname, "public", "sw.js");
+      const swOutputPath = path.join(outDir, "sw.js");
+      const source = fs
+        .readFileSync(swSourcePath, "utf8")
+        .replace(
+          'const BUILD_CACHE_VERSION = "dev";',
+          `const BUILD_CACHE_VERSION = ${JSON.stringify(cacheVersion)};`,
+        )
+        .replace(
+          "const BUILD_ASSET_URLS = [];",
+          `const BUILD_ASSET_URLS = ${JSON.stringify(buildAssetUrls, null, 2)};`,
+        );
+
+      fs.writeFileSync(swOutputPath, source);
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
@@ -54,6 +88,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       googleVerificationFallbackPlugin(env.VITE_GOOGLE_SITE_VERIFICATION),
       react(),
+      serviceWorkerPrecachePlugin(),
     ],
     define: {
       "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),

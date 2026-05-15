@@ -755,7 +755,7 @@
 
   /* Strip the solid bg so ghost map shows through */
   .app-shell > .preview-panel .poster-viewport {
-    background: #080f18;
+    background: #07131a;
   }
 
   /* Map controls: floating pill at bottom center of map area */

@@ -132,7 +132,7 @@ export default function MarkerOverlay({
         : [],
     // renderTick drives recomputation when the map view changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [map, markers, customIcons, renderTick],
+    [map, markers, customIcons, overzoomScale, renderTick],
   );
 
   const updateMarkerByClientPoint = useCallback(
@@ -164,7 +164,7 @@ export default function MarkerOverlay({
         // Ignore projection failures during drag.
       }
     },
-    [isMarkerEditMode, mapRef, onMarkerPositionChange],
+    [isMarkerEditMode, mapRef, onMarkerPositionChange, overzoomScale],
   );
 
   const nudgeMarkerByScreenDelta = useCallback(
@@ -205,7 +205,7 @@ export default function MarkerOverlay({
         // Ignore projection failures during keyboard nudging.
       }
     },
-    [isMarkerEditMode, mapRef, onMarkerPositionChange],
+    [isMarkerEditMode, mapRef, onMarkerPositionChange, overzoomScale],
   );
 
   const handleMarkerPointerDown = useCallback(

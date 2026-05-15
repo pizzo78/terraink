@@ -11,8 +11,12 @@ async function fetchWithTimeout(
 
   let onExternalAbort: (() => void) | null = null;
   if (externalSignal) {
-    onExternalAbort = () => controller.abort();
-    externalSignal.addEventListener("abort", onExternalAbort, { once: true });
+    if (externalSignal.aborted) {
+      controller.abort();
+    } else {
+      onExternalAbort = () => controller.abort();
+      externalSignal.addEventListener("abort", onExternalAbort, { once: true });
+    }
   }
 
   try {

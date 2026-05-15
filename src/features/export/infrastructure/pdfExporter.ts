@@ -3,15 +3,6 @@ import type { ExportOptions } from "../domain/types";
 const PT_PER_MM = 72 / 25.4;
 const MM_PER_CM = 10;
 
-function base64ToBytes(base64: string): Uint8Array {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-  return bytes;
-}
-
 function normalizePositiveNumber(value: number, fallback: number): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -44,6 +35,22 @@ function formatPdfBox(
   return `[${formatPdfNumber(left)} ${formatPdfNumber(bottom)} ${formatPdfNumber(right)} ${formatPdfNumber(top)}]`;
 }
 
+function canvasToJpegBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+        reject(new Error("Failed to create JPEG blob from canvas."));
+      },
+      "image/jpeg",
+      0.94,
+    );
+  });
+}
+
 function buildCropMarkCommands(options: {
   trimLeft: number;
   trimBottom: number;
@@ -71,10 +78,10 @@ function buildCropMarkCommands(options: {
   return commands;
 }
 
-export function createPdfBlobFromCanvas(
+export async function createPdfBlobFromCanvas(
   canvas: HTMLCanvasElement,
   options: Partial<ExportOptions> = {},
-): Blob {
+): Promise<Blob> {
   const imageWidth = Math.max(1, Math.round(Number(canvas?.width) || 1));
   const imageHeight = Math.max(1, Math.round(Number(canvas?.height) || 1));
   const widthCm = normalizePositiveNumber(options.widthCm ?? 20, 20);
@@ -114,9 +121,8 @@ export function createPdfBlobFromCanvas(
   const imageDrawWidth = drawFullBleed ? bleedRight - bleedLeft : posterWidthPt;
   const imageDrawHeight = drawFullBleed ? bleedTop - bleedBottom : posterHeightPt;
 
-  const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.94);
-  const base64 = jpegDataUrl.split(",")[1] || "";
-  const imageBytes = base64ToBytes(base64);
+  const jpegBlob = await canvasToJpegBlob(canvas);
+  const imageBytes = new Uint8Array(await jpegBlob.arrayBuffer());
 
   const contentStream = [
     "q",

@@ -190,7 +190,7 @@ export function useExport() {
         );
 
         if (format === "pdf") {
-          const pdfBlob = createPdfBlobFromCanvas(canvas, {
+          const pdfBlob = await createPdfBlobFromCanvas(canvas, {
             widthCm,
             heightCm,
             marginMm: settings.marginMm,

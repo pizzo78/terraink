@@ -160,6 +160,7 @@ export default function SettingsPanel({
             {!isColorEditorActive ? (
               <MapSettingsSection
                 activeMobileTab={mobileTab}
+                sectionMode="theme"
                 form={state.form}
                 onChange={handleChange}
                 onNumericFieldBlur={handleNumericFieldBlur}
@@ -197,6 +198,7 @@ export default function SettingsPanel({
             {!isColorEditorActive ? (
               <MapSettingsSection
                 activeMobileTab={mobileTab}
+                sectionMode="layout"
                 form={state.form}
                 onChange={handleChange}
                 onNumericFieldBlur={handleNumericFieldBlur}

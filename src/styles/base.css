@@ -1,17 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap");
+@import "@fontsource/lato/latin-400.css";
+@import "@fontsource/lato/latin-700.css";
+@import "@fontsource/bebas-neue/latin-400.css";
 
 :root {
-  --ink: #e6edf4;
-  --panel: rgba(10, 20, 31, 0.92);
-  --line: rgba(146, 176, 200, 0.24);
-  --border: rgba(151, 183, 207, 0.34);
-  --strong-line: rgba(166, 199, 223, 0.45);
+  --ink: #eef6f5;
+  --panel: rgba(7, 19, 26, 0.93);
+  --line: rgba(127, 184, 189, 0.25);
+  --border: rgba(139, 202, 207, 0.34);
+  --strong-line: rgba(157, 220, 224, 0.46);
   --positive: #6bd8a0;
   --negative: #ff8372;
-  --focus-ring: rgba(112, 184, 222, 0.82);
-  --item-bg: rgba(20, 38, 52, 0.94);
-  --sheet-bg: rgba(11, 20, 30, 0.98);
-  --overlay-bg: rgba(9, 16, 24, 0.97);
+  --focus-ring: rgba(88, 210, 207, 0.82);
+  --item-bg: rgba(17, 39, 49, 0.94);
+  --sheet-bg: rgba(7, 18, 25, 0.98);
+  --overlay-bg: rgba(5, 12, 17, 0.97);
 }
 
 *,
@@ -24,27 +26,27 @@ html,
 body {
   margin: 0;
   color: var(--ink);
-  font-family: "Instrument Sans", sans-serif;
-  background-color: #080f18;
+  font-family: "Lato", sans-serif;
+  background-color: #07131a;
   background:
-    radial-gradient(
-      circle at 84% 14%,
-      rgba(255, 132, 79, 0.2),
-      transparent 42%
-    ),
-    radial-gradient(
-      circle at 12% 86%,
-      rgba(64, 154, 192, 0.22),
-      transparent 38%
+    linear-gradient(
+      122deg,
+      transparent 0,
+      transparent 36%,
+      rgba(88, 210, 207, 0.08) 36.15%,
+      transparent 36.35%,
+      transparent 64%,
+      rgba(255, 138, 61, 0.08) 64.15%,
+      transparent 64.35%
     ),
     repeating-linear-gradient(
       90deg,
-      rgba(164, 195, 219, 0.05) 0,
-      rgba(164, 195, 219, 0.05) 1px,
+      rgba(244, 239, 230, 0.035) 0,
+      rgba(244, 239, 230, 0.035) 1px,
       transparent 1px,
       transparent 24px
     ),
-    linear-gradient(160deg, #09121c, #0d1a27 45%, #0a1824 100%);
+    linear-gradient(160deg, #102833, #07131a 48%, #05090d 100%);
   min-height: 100vh;
   min-height: 100dvh;
   width: 100%;
@@ -54,5 +56,5 @@ body {
 #root {
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: #080f18;
+  background-color: #07131a;
 }

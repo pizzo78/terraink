@@ -26,8 +26,8 @@
     <style>
       body {
         margin: 0;
-        background: #08131d;
-        color: #e7f2fb;
+        background: #07131a;
+        color: #eef6f5;
         font-family: Inter, system-ui, sans-serif;
       }
       main {
@@ -38,7 +38,7 @@
       img {
         width: 100%;
         border-radius: 8px;
-        border: 1px solid rgba(165, 198, 221, 0.24);
+        border: 1px solid rgba(139, 202, 207, 0.28);
       }
       h1 {
         font-size: clamp(2rem, 6vw, 4rem);
@@ -47,7 +47,7 @@
       }
       p {
         max-width: 720px;
-        color: #bad0df;
+        color: #b8ced9;
         line-height: 1.65;
       }
       a {
@@ -60,8 +60,8 @@
         align-items: center;
         padding: 0 16px;
         border-radius: 8px;
-        background: #e7f2fa;
-        color: #0d1f2e;
+        background: #f7f0e6;
+        color: #07131a;
         font-weight: 800;
         text-decoration: none;
       }
@@ -76,7 +76,17 @@
         include crop marks for professional print workflows.
       </p>
       <a class="cta" href="/">Create a Print Poster</a>
-      <img src="/assets/banner.png" alt="PosterEngine banner" />
+      <picture>
+        <source srcset="/assets/banner.webp" type="image/webp" />
+        <img
+          src="/assets/banner.png"
+          alt="PosterEngine banner"
+          width="1200"
+          height="630"
+          loading="lazy"
+          decoding="async"
+        />
+      </picture>
     </main>
   </body>
 </html>

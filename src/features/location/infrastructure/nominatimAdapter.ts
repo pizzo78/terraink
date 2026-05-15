@@ -17,6 +17,24 @@ import {
 const inFlightSearchRequests = new Map<string, Promise<SearchResult[]>>();
 const inFlightReverseRequests = new Map<string, Promise<SearchResult>>();
 
+async function readNominatimJson(response: Response): Promise<unknown> {
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("Too many location requests. Please try again shortly.");
+    }
+    if (response.status >= 500) {
+      throw new Error("Location service is temporarily unavailable.");
+    }
+    throw new Error(`Location request failed with HTTP ${response.status}.`);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("Location service returned invalid data.");
+  }
+}
+
 export function createNominatimAdapter(
   http: IHttp,
   cache: ICache,
@@ -49,7 +67,7 @@ export function createNominatimAdapter(
     const promise = http
       .get(url, { headers: { Accept: "application/json" }, signal }, 16_000)
       .then(async (response) => {
-        const data = await response.json();
+        const data = await readNominatimJson(response);
         const results = parseLocationResponseItems(data);
         cache.write(cacheKey, results);
         return results;
@@ -128,7 +146,7 @@ export function createNominatimAdapter(
     const promise = http
       .get(url, { headers: { Accept: "application/json" } }, 16_000)
       .then(async (response) => {
-        const data = await response.json();
+        const data = await readNominatimJson(response);
         const normalized = normalizeLocationResult(data);
         if (!normalized) {
           throw new Error("No nearby city found for the selected coordinates.");

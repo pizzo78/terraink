@@ -43,6 +43,7 @@ interface MapSettingsForm {
 
 interface MapSettingsSectionProps {
   activeMobileTab?: string;
+  sectionMode?: "all" | "theme" | "layout";
   form: MapSettingsForm;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onNumericFieldBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
@@ -61,6 +62,7 @@ interface MapSettingsSectionProps {
 
 export default function MapSettingsSection({
   activeMobileTab,
+  sectionMode = "all",
   form,
   onChange,
   onNumericFieldBlur,
@@ -76,6 +78,8 @@ export default function MapSettingsSection({
   onResetColors,
   onColorEditorActiveChange,
 }: MapSettingsSectionProps) {
+  const showThemePart = sectionMode === "all" || sectionMode === "theme";
+  const showLayoutPart = sectionMode === "all" || sectionMode === "layout";
   const [isThemeEditing, setIsThemeEditing] = useState(false);
   const [isLayoutEditing, setIsLayoutEditing] = useState(false);
   const defaultColorKey: ThemeColorKey = DISPLAY_PALETTE_KEYS[0] ?? "ui.bg";
@@ -270,14 +274,17 @@ export default function MapSettingsSection({
     : "Color";
 
   useEffect(() => {
+    if (!showThemePart) {
+      return;
+    }
     onColorEditorActiveChange?.(false);
     return () => {
       onColorEditorActiveChange?.(false);
     };
-  }, [onColorEditorActiveChange]);
+  }, [onColorEditorActiveChange, showThemePart]);
 
   useEffect(() => {
-    if (activeMobileTab !== "theme") {
+    if (!showThemePart || activeMobileTab !== "theme") {
       return;
     }
     const frameId = window.requestAnimationFrame(() => {
@@ -291,10 +298,10 @@ export default function MapSettingsSection({
       });
     });
     return () => window.cancelAnimationFrame(frameId);
-  }, [activeMobileTab]);
+  }, [activeMobileTab, showThemePart]);
 
   useEffect(() => {
-    if (activeMobileTab !== "layout" || isLayoutEditing) {
+    if (!showLayoutPart || activeMobileTab !== "layout" || isLayoutEditing) {
       return;
     }
     const frameId = window.requestAnimationFrame(() => {
@@ -309,7 +316,7 @@ export default function MapSettingsSection({
       });
     });
     return () => window.cancelAnimationFrame(frameId);
-  }, [activeMobileTab, isLayoutEditing]);
+  }, [activeMobileTab, isLayoutEditing, showLayoutPart]);
 
   const editorKey = activeColorKey || defaultColorKey;
   const editorChoices = activeColorKey
@@ -331,6 +338,7 @@ export default function MapSettingsSection({
 
   return (
     <section className="panel-block">
+      {showThemePart ? (
       <div className="map-settings-theme-part">
         <h2>Theme</h2>
 
@@ -388,7 +396,9 @@ export default function MapSettingsSection({
           />
         )}
       </div>
+      ) : null}
 
+      {showLayoutPart ? (
       <div className="map-settings-layout-part">
         <h2>Layout</h2>
         <div className="layout-summary-head">
@@ -459,6 +469,7 @@ export default function MapSettingsSection({
           </div>
         )}
       </div>
+      ) : null}
     </section>
   );
 }

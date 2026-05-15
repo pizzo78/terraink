@@ -47,6 +47,7 @@ const COUNTRY_VIEW_ZOOM_LEVEL = 10;
 const CONTINENT_VIEW_ZOOM_LEVEL = 6;
 const DEFAULT_LOCATION_LABEL =
   "Hanover, Region Hannover, Lower Saxony, Germany";
+const GHOST_CANVAS_SYNC_INTERVAL_MS = 100;
 
 export default function PreviewPanel() {
   const { state, dispatch, effectiveTheme, mapStyle, mapRef } =
@@ -131,7 +132,14 @@ export default function PreviewPanel() {
     const map = mapRef.current;
     if (!map) return;
 
+    let frameId = 0;
+    let timeoutId = 0;
+    let lastSyncAt = 0;
+
     const syncGhostCanvas = () => {
+      frameId = 0;
+      timeoutId = 0;
+      lastSyncAt = performance.now();
       const ghost = ghostCanvasRef.current;
       if (!ghost) return;
       const src = map.getCanvas();
@@ -147,9 +155,32 @@ export default function PreviewPanel() {
       ctx.drawImage(src, 0, 0);
     };
 
-    map.on("render", syncGhostCanvas);
+    const scheduleGhostCanvasSync = () => {
+      if (frameId || timeoutId) {
+        return;
+      }
+
+      const elapsed = performance.now() - lastSyncAt;
+      if (elapsed >= GHOST_CANVAS_SYNC_INTERVAL_MS) {
+        frameId = window.requestAnimationFrame(syncGhostCanvas);
+        return;
+      }
+
+      timeoutId = window.setTimeout(() => {
+        frameId = window.requestAnimationFrame(syncGhostCanvas);
+      }, GHOST_CANVAS_SYNC_INTERVAL_MS - elapsed);
+    };
+
+    syncGhostCanvas();
+    map.on("render", scheduleGhostCanvasSync);
     return () => {
-      map.off("render", syncGhostCanvas);
+      map.off("render", scheduleGhostCanvasSync);
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
     };
   }, [mapRef]);
 

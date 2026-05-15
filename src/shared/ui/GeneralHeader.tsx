@@ -17,7 +17,7 @@ export default function GeneralHeader({ onAboutOpen }: GeneralHeaderProps) {
         <div className="desktop-brand-copy brand-copy">
           <h1 className="desktop-brand-title">PosterEngine</h1>
           <p className="desktop-brand-kicker app-kicker">
-            Free Map Poster & Wallpaper Creator
+            Map Art From Real Places
           </p>
         </div>
       </div>

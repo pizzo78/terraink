@@ -159,14 +159,12 @@ export async function createLayeredSvgBlobFromMap({
         ),
       });
       exportMap.setLayoutProperty(layerId, "visibility", "none");
-      await waitForMapIdle(exportMap);
     }
 
     for (const layerId of layerIds) {
       const visibility = originalVisibility.get(layerId) ?? "visible";
       exportMap.setLayoutProperty(layerId, "visibility", visibility);
     }
-    await waitForMapIdle(exportMap);
 
     const overlayLayers: { id: string; dataUrl: string }[] = [];
 

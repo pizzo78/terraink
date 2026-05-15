@@ -1,4 +1,6 @@
-const CACHE_NAME = "posterengine-static-v1";
+const BUILD_CACHE_VERSION = "dev";
+const BUILD_ASSET_URLS = [];
+const CACHE_NAME = `posterengine-static-${BUILD_CACHE_VERSION}`;
 const TILE_CACHE_NAME = "posterengine-tiles-v1";
 const TILE_ORIGINS = ["https://tiles.openfreemap.org"];
 const MAX_TILE_CACHE_ENTRIES = 800;
@@ -6,12 +8,15 @@ const APP_SHELL_ASSETS = [
   "/",
   "/index.html",
   "/site.webmanifest",
+  "/assets/logo.svg",
+  "/assets/marker.svg",
   "/assets/icon-192.png",
   "/assets/icon-512.png",
   "/assets/icon-maskable.png",
   "/assets/favicon-32.png",
   "/assets/favicon-16.png",
   "/assets/apple-touch-icon.png",
+  ...BUILD_ASSET_URLS,
 ];
 
 async function trimCache(cache, maxEntries) {
