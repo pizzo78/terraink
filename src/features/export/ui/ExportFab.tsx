@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import { useExport } from "@/features/export/application/useExport";
+import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { usePosterShareLink } from "@/features/share/application/usePosterShareLink";
+import { buildPreflightReport } from "@/features/preflight/domain/preflight";
 import {
   EXPORT_DPI_OPTIONS,
   type ExportDpi,
   type ExportFormat,
 } from "@/features/export/domain/types";
-import { CloseIcon, DownloadIcon, LinkIcon, LoaderIcon } from "@/shared/ui/Icons";
+import {
+  CloseIcon,
+  DownloadIcon,
+  LinkIcon,
+  LoaderIcon,
+  PackageIcon,
+} from "@/shared/ui/Icons";
 import SocialLinkGroup from "@/shared/ui/SocialLinkGroup";
 
 const FORMAT_OPTIONS: { format: ExportFormat; label: string }[] = [
@@ -32,7 +40,14 @@ interface ExportFabProps {
 }
 
 export default function ExportFab({ isMobile }: ExportFabProps) {
-  const { isExporting, exportPoster, exportSettings, setExportSettings } =
+  const { state, effectiveTheme } = usePosterContext();
+  const {
+    isExporting,
+    exportPoster,
+    exportPosterPack,
+    exportSettings,
+    setExportSettings,
+  } =
     useExport();
   const {
     status: shareStatus,
@@ -43,8 +58,9 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
     maxSharedMarkers,
   } = usePosterShareLink();
   const [isOpen, setIsOpen] = useState(false);
-  const [activeFormat, setActiveFormat] = useState<ExportFormat | null>(null);
+  const [activeFormat, setActiveFormat] = useState<ExportFormat | "pack" | null>(null);
   const [isTriggerVisible, setIsTriggerVisible] = useState(true);
+  const preflight = buildPreflightReport(state, effectiveTheme, exportSettings);
 
   useEffect(() => {
     if (!isExporting && activeFormat) {
@@ -78,6 +94,11 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
   const runExport = (format: ExportFormat) => {
     setActiveFormat(format);
     void exportPoster(format);
+  };
+
+  const runExportPack = () => {
+    setActiveFormat("pack");
+    void exportPosterPack();
   };
 
   const updatePrintNumber = (
@@ -140,6 +161,24 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
               </button>
             </div>
             <div className="export-modal-actions">
+              <div className={`export-preflight export-preflight--${preflight.status}`}>
+                <div className="export-preflight__head">
+                  <span>Preflight</span>
+                  <strong>
+                    {preflight.status === "pass" ? "Ready" : preflight.status}
+                  </strong>
+                </div>
+                <div className="export-preflight__items">
+                  {preflight.items.slice(0, 3).map((item) => (
+                    <span
+                      key={item.id}
+                      className={`export-preflight__item export-preflight__item--${item.severity}`}
+                    >
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
               <div className="export-modal-print-panel">
                 <div className="export-modal-dpi-group" role="group" aria-label="DPI">
                   {EXPORT_DPI_OPTIONS.map((dpi) => (
@@ -262,6 +301,20 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
                   <span>{label}</span>
                 </button>
               ))}
+              <button
+                type="button"
+                className="export-modal-option export-modal-option--pack"
+                onClick={runExportPack}
+                disabled={isExporting}
+              >
+                {isExporting && activeFormat === "pack" ? (
+                  <LoaderIcon className="export-modal-option-icon is-spinning" />
+                ) : (
+                  <PackageIcon className="export-modal-option-icon" />
+                )}
+                <span>Export Pack</span>
+                <small>PDF + PNG + SVG</small>
+              </button>
               <div className="export-modal-advanced">
                 <p className="export-modal-advanced-label">Advanced</p>
                 {ADVANCED_FORMAT_OPTIONS.map(({ format, label, note }) => (

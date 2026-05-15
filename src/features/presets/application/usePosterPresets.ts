@@ -1,14 +1,16 @@
 import { useCallback } from "react";
-import { usePosterDispatch } from "@/features/poster/ui/PosterContext";
+import { createPosterSnapshot } from "@/features/poster/application/posterReducer";
+import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { formatLayoutCm } from "@/features/layout/domain/layoutMatcher";
 import { getLayoutOption } from "@/features/layout/infrastructure/layoutRepository";
+import { normalizeExportSettings } from "@/features/export/domain/types";
 import {
   getPosterPreset,
   posterPresets,
 } from "@/features/presets/infrastructure/presetRepository";
 
 export function usePosterPresets() {
-  const { dispatch } = usePosterDispatch();
+  const { state, dispatch } = usePosterContext();
 
   const applyPreset = useCallback(
     (presetId: string) => {
@@ -22,21 +24,28 @@ export function usePosterPresets() {
         return;
       }
 
+      const snapshot = createPosterSnapshot(state);
+
       dispatch({
-        type: "SET_FORM_FIELDS",
-        fields: {
-          ...preset.form,
-          layout: layout.id,
-          width: formatLayoutCm(layout.widthCm),
-          height: formatLayoutCm(layout.heightCm),
+        type: "APPLY_POSTER_SNAPSHOT",
+        snapshot: {
+          ...snapshot,
+          form: {
+            ...snapshot.form,
+            ...preset.form,
+            layout: layout.id,
+            width: formatLayoutCm(layout.widthCm),
+            height: formatLayoutCm(layout.heightCm),
+          },
+          customColors: preset.form.theme ? {} : snapshot.customColors,
+          exportSettings: normalizeExportSettings({
+            ...snapshot.exportSettings,
+            ...preset.exportSettings,
+          }),
         },
       });
-      dispatch({
-        type: "SET_EXPORT_SETTINGS",
-        settings: preset.exportSettings,
-      });
     },
-    [dispatch],
+    [dispatch, state],
   );
 
   return {

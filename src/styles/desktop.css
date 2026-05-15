@@ -758,6 +758,21 @@
     background: #07131a;
   }
 
+  .app-shell > .preview-panel .poster-viewport.poster-viewport--wall {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(180deg, #162a32, #0b151a 58%, #081016 100%);
+    background-size: 48px 100%, 100% 100%;
+  }
+
+  .app-shell > .preview-panel .poster-frame.poster-frame--mockup {
+    border: 10px solid #edf2ef;
+    box-shadow:
+      0 34px 56px rgba(0, 0, 0, 0.56),
+      0 12px 18px rgba(0, 0, 0, 0.38),
+      0 0 0 1px rgba(7, 17, 21, 0.38);
+  }
+
   /* Map controls: floating pill at bottom center of map area */
   .app-shell > .preview-panel .poster-frame .map-controls {
     position: absolute;

@@ -27,6 +27,22 @@
   background-size: 26px 26px;
 }
 
+.poster-viewport--wall {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, #162a32, #0b151a 58%, #081016 100%);
+  background-size: 48px 100%, 100% 100%;
+}
+
+.poster-viewport--wall::before {
+  top: auto;
+  height: 28%;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.28)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 100% 100%, 64px 100%;
+}
+
 /* ── Poster frame ── */
 
 .poster-frame {
@@ -42,6 +58,14 @@
   box-shadow:
     0 24px 34px rgba(0, 0, 0, 0.5),
     0 8px 14px rgba(0, 0, 0, 0.42);
+}
+
+.poster-frame--mockup {
+  border: 10px solid #edf2ef;
+  box-shadow:
+    0 34px 56px rgba(0, 0, 0, 0.56),
+    0 12px 18px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(7, 17, 21, 0.38);
 }
 
 /* ── Ghost canvas: covers ghost layer, preserving poster aspect ratio ── */

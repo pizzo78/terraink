@@ -29,7 +29,7 @@ const tabs: {
   { id: "style", label: "Style", Icon: StyleIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
   { id: "markers", label: "Markers", Icon: MarkersIcon },
-  { id: "presets", label: "Presets", Icon: PresetsIcon },
+  { id: "presets", label: "Studio", Icon: PresetsIcon },
 ];
 
 interface MobileNavBarProps {

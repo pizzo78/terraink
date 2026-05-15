@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { createPosterSnapshot } from "@/features/poster/application/posterReducer";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { formatLayoutCm } from "@/features/layout/domain/layoutMatcher";
 import {
@@ -11,13 +12,55 @@ import {
 } from "@/features/theme/infrastructure/themeRepository";
 import type { PosterVariation } from "@/features/variations/domain/types";
 
-const VARIATION_LAYOUT_IDS = [
-  "print_a4_portrait",
-  "social_instagram_square",
-  "social_instagram_story_tiktok",
-  "wallpaper_desktop_4k",
-  "wallpaper_iphone_15_pro",
-  "web_blog_featured",
+const VARIATION_RECIPES = [
+  {
+    name: "Gallery Print",
+    description: "Portrait, print-safe spacing and classic title scale.",
+    layoutId: "print_a4_portrait",
+    fontFamily: "Playfair Display",
+    distanceFactor: 1,
+    textScale: "100",
+  },
+  {
+    name: "Social Square",
+    description: "Tighter crop with bold text for sharing.",
+    layoutId: "social_instagram_square",
+    fontFamily: "Montserrat",
+    distanceFactor: 0.82,
+    textScale: "108",
+  },
+  {
+    name: "Story Poster",
+    description: "Vertical mobile-first variant with larger typography.",
+    layoutId: "social_instagram_story_tiktok",
+    fontFamily: "Bebas neue",
+    distanceFactor: 0.72,
+    textScale: "112",
+  },
+  {
+    name: "Desktop Wide",
+    description: "Wide quiet crop for wallpaper or header use.",
+    layoutId: "wallpaper_desktop_4k",
+    fontFamily: "Lato",
+    distanceFactor: 1.35,
+    textScale: "92",
+  },
+  {
+    name: "Mobile Clean",
+    description: "No-friction mobile wallpaper composition.",
+    layoutId: "wallpaper_iphone_15_pro",
+    fontFamily: "Raleway",
+    distanceFactor: 0.9,
+    textScale: "94",
+  },
+  {
+    name: "Editorial Feature",
+    description: "Landscape composition with restrained map detail.",
+    layoutId: "web_blog_featured",
+    fontFamily: "Source Sans Pro",
+    distanceFactor: 1.15,
+    textScale: "96",
+  },
 ];
 
 export function usePosterVariations() {
@@ -29,9 +72,10 @@ export function usePosterVariations() {
       themeOptions.findIndex((theme) => theme.id === state.form.theme),
       0,
     );
-    const nextVariations = VARIATION_LAYOUT_IDS.map((layoutId, index) => {
+    const baseDistance = Math.max(100, Number(state.form.distance) || 4000);
+    const nextVariations = VARIATION_RECIPES.map((recipe, index) => {
       const layout =
-        getLayoutOption(layoutId) ?? layoutOptions[index % layoutOptions.length];
+        getLayoutOption(recipe.layoutId) ?? layoutOptions[index % layoutOptions.length];
       const theme =
         themeOptions[(themeStart + index + 1) % themeOptions.length] ??
         themeOptions.find((option) => option.id === defaultThemeName) ??
@@ -42,16 +86,21 @@ export function usePosterVariations() {
       }
 
       return {
-        id: `${theme.id}-${layout.id}`,
+        id: `${recipe.name}-${theme.id}-${layout.id}`,
+        name: recipe.name,
+        description: recipe.description,
         themeId: theme.id,
         themeName: theme.name,
         layoutId: layout.id,
         layoutName: layout.name,
+        fontFamily: recipe.fontFamily,
+        distance: String(Math.round(baseDistance * recipe.distanceFactor)),
+        textScale: recipe.textScale,
       };
     }).filter((variation): variation is PosterVariation => variation !== null);
 
     setVariations(nextVariations);
-  }, [state.form.theme]);
+  }, [state.form.distance, state.form.theme]);
 
   const applyVariation = useCallback(
     (variation: PosterVariation) => {
@@ -60,15 +109,26 @@ export function usePosterVariations() {
         return;
       }
 
-      dispatch({ type: "SET_THEME", themeId: variation.themeId });
+      const snapshot = createPosterSnapshot(state);
       dispatch({
-        type: "SET_LAYOUT",
-        layoutId: layout.id,
-        widthCm: formatLayoutCm(layout.widthCm),
-        heightCm: formatLayoutCm(layout.heightCm),
+        type: "APPLY_POSTER_SNAPSHOT",
+        snapshot: {
+          ...snapshot,
+          customColors: {},
+          form: {
+            ...snapshot.form,
+            theme: variation.themeId,
+            layout: layout.id,
+            width: formatLayoutCm(layout.widthCm),
+            height: formatLayoutCm(layout.heightCm),
+            fontFamily: variation.fontFamily,
+            distance: variation.distance,
+            textScale: variation.textScale,
+          },
+        },
       });
     },
-    [dispatch],
+    [dispatch, state],
   );
 
   return {

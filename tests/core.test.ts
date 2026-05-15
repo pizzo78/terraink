@@ -7,7 +7,11 @@ import {
   MIN_MARKER_SIZE,
   MAX_MARKER_SIZE,
 } from "../src/features/markers/domain/constants";
-import { posterReducer, type PosterState } from "../src/features/poster/application/posterReducer";
+import {
+  createPosterSnapshot,
+  posterReducer,
+  type PosterState,
+} from "../src/features/poster/application/posterReducer";
 import {
   createPosterShareUrl,
   readPosterSharePayload,
@@ -61,6 +65,10 @@ function makeState(markerCount = 0): PosterState {
     customMarkerIcons: [],
     markerDefaults: { size: 36, color: "#ffffff" },
     exportSettings: normalizeExportSettings(null),
+    history: [],
+    future: [],
+    seriesItems: [],
+    previewMode: "poster",
     isMarkerEditorActive: false,
     activeMarkerId: null,
     error: "",
@@ -73,6 +81,40 @@ function makeState(markerCount = 0): PosterState {
       country: false,
     },
   };
+}
+
+{
+  const state = makeState(0);
+  const next = posterReducer(state, {
+    type: "SET_FIELD",
+    name: "displayCity",
+    value: "Rome",
+  });
+  const undone = posterReducer(next, { type: "UNDO" });
+  const redone = posterReducer(undone, { type: "REDO" });
+
+  assert.equal(next.form.displayCity, "Rome");
+  assert.equal(next.history.length, 1);
+  assert.equal(undone.form.displayCity, "Milan");
+  assert.equal(undone.future.length, 1);
+  assert.equal(redone.form.displayCity, "Rome");
+}
+
+{
+  const state = makeState(1);
+  const snapshot = createPosterSnapshot({
+    ...state,
+    form: { ...state.form, displayCity: "Series Poster" },
+    markers: [makeMarker(8), makeMarker(9)],
+  });
+  const next = posterReducer(state, {
+    type: "APPLY_POSTER_SNAPSHOT",
+    snapshot,
+  });
+
+  assert.equal(next.form.displayCity, "Series Poster");
+  assert.equal(next.markers.length, 2);
+  assert.equal(next.history.length, 1);
 }
 
 {

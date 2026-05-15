@@ -100,6 +100,10 @@ export interface PosterState {
   customMarkerIcons: MarkerIconDefinition[];
   markerDefaults: MarkerDefaults;
   exportSettings: ExportSettings;
+  history: PosterDesignSnapshot[];
+  future: PosterDesignSnapshot[];
+  seriesItems: PosterSeriesItem[];
+  previewMode: "poster" | "wall";
   isMarkerEditorActive: boolean;
   activeMarkerId: string | null;
   error: string;
@@ -114,6 +118,22 @@ export interface PosterState {
 }
 
 /* ────── Actions ────── */
+
+export interface PosterDesignSnapshot {
+  form: PosterForm;
+  customColors: Record<string, string>;
+  markers: MarkerItem[];
+  customMarkerIcons: MarkerIconDefinition[];
+  markerDefaults: MarkerDefaults;
+  exportSettings: ExportSettings;
+}
+
+export interface PosterSeriesItem {
+  id: string;
+  name: string;
+  createdAt: number;
+  snapshot: PosterDesignSnapshot;
+}
 
 export type PosterAction =
   | { type: "SET_FIELD"; name: string; value: string | boolean }
@@ -149,11 +169,165 @@ export type PosterAction =
       applyToMarkers?: boolean;
     }
   | { type: "RESET_MARKER_DEFAULTS" }
-  | { type: "SET_EXPORT_SETTINGS"; settings: Partial<ExportSettings> };
+  | { type: "SET_EXPORT_SETTINGS"; settings: Partial<ExportSettings> }
+  | { type: "UNDO" }
+  | { type: "REDO" }
+  | { type: "APPLY_POSTER_SNAPSHOT"; snapshot: PosterDesignSnapshot }
+  | { type: "ADD_SERIES_ITEM"; item: PosterSeriesItem }
+  | { type: "REMOVE_SERIES_ITEM"; itemId: string }
+  | { type: "CLEAR_SERIES_ITEMS" }
+  | { type: "SET_PREVIEW_MODE"; mode: "poster" | "wall" };
+
+const MAX_HISTORY_ENTRIES = 30;
+
+const HISTORY_ACTION_TYPES = new Set<PosterAction["type"]>([
+  "SET_FIELD",
+  "SET_FORM_FIELDS",
+  "SET_THEME",
+  "SET_LAYOUT",
+  "SET_COLOR",
+  "RESET_COLORS",
+  "SELECT_LOCATION",
+  "CLEAR_LOCATION",
+  "SET_EXPORT_SETTINGS",
+  "ADD_MARKER",
+  "ADD_MARKERS",
+  "UPDATE_MARKER",
+  "REMOVE_MARKER",
+  "CLEAR_MARKERS",
+  "ADD_CUSTOM_MARKER_ICON",
+  "REMOVE_CUSTOM_MARKER_ICON",
+  "CLEAR_CUSTOM_MARKER_ICONS",
+  "SET_MARKER_DEFAULTS",
+  "RESET_MARKER_DEFAULTS",
+  "APPLY_POSTER_SNAPSHOT",
+]);
+
+function cloneMarkers(markers: MarkerItem[]): MarkerItem[] {
+  return markers.map((marker) => ({ ...marker }));
+}
+
+function cloneMarkerDefaults(defaults: MarkerDefaults): MarkerDefaults {
+  return { ...defaults };
+}
+
+export function createPosterSnapshot(
+  state: Pick<
+    PosterState,
+    | "form"
+    | "customColors"
+    | "markers"
+    | "customMarkerIcons"
+    | "markerDefaults"
+    | "exportSettings"
+  >,
+): PosterDesignSnapshot {
+  const customMarkerIcons = Array.isArray(state.customMarkerIcons)
+    ? state.customMarkerIcons
+    : [];
+
+  return {
+    form: { ...state.form },
+    customColors: { ...state.customColors },
+    markers: cloneMarkers(state.markers),
+    customMarkerIcons: customMarkerIcons.map((icon) => ({ ...icon })),
+    markerDefaults: cloneMarkerDefaults(state.markerDefaults),
+    exportSettings: normalizeExportSettings(state.exportSettings),
+  };
+}
+
+function restorePosterSnapshot(
+  state: PosterState,
+  snapshot: PosterDesignSnapshot,
+): PosterState {
+  return {
+    ...state,
+    form: { ...state.form, ...snapshot.form },
+    customColors: { ...snapshot.customColors },
+    markers: cloneMarkers(snapshot.markers),
+    customMarkerIcons: Array.isArray(snapshot.customMarkerIcons)
+      ? snapshot.customMarkerIcons.map((icon) => ({ ...icon }))
+      : state.customMarkerIcons,
+    markerDefaults: cloneMarkerDefaults(snapshot.markerDefaults),
+    exportSettings: normalizeExportSettings(snapshot.exportSettings),
+    isMarkerEditorActive: false,
+    activeMarkerId: null,
+    selectedLocation: null,
+    error: "",
+    displayNameOverrides: {
+      city: false,
+      country: false,
+    },
+  };
+}
+
+function snapshotsEqual(
+  left: PosterDesignSnapshot,
+  right: PosterDesignSnapshot,
+): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function shouldCaptureHistory(action: PosterAction): boolean {
+  return HISTORY_ACTION_TYPES.has(action.type);
+}
 
 /* ────── Reducer ────── */
 
 export function posterReducer(
+  state: PosterState,
+  action: PosterAction,
+): PosterState {
+  const history = Array.isArray(state.history) ? state.history : [];
+  const future = Array.isArray(state.future) ? state.future : [];
+
+  if (action.type === "UNDO") {
+    const previous = history[history.length - 1];
+    if (!previous) {
+      return state;
+    }
+    const current = createPosterSnapshot(state);
+    return {
+      ...restorePosterSnapshot(state, previous),
+      history: history.slice(0, -1),
+      future: [current, ...future].slice(0, MAX_HISTORY_ENTRIES),
+    };
+  }
+
+  if (action.type === "REDO") {
+    const nextSnapshot = future[0];
+    if (!nextSnapshot) {
+      return state;
+    }
+    const current = createPosterSnapshot(state);
+    return {
+      ...restorePosterSnapshot(state, nextSnapshot),
+      history: [...history, current].slice(-MAX_HISTORY_ENTRIES),
+      future: future.slice(1),
+    };
+  }
+
+  const shouldRecord = shouldCaptureHistory(action);
+  const previousSnapshot = shouldRecord ? createPosterSnapshot(state) : null;
+  const nextState = reducePosterAction(state, action);
+
+  if (!shouldRecord || !previousSnapshot || nextState === state) {
+    return nextState;
+  }
+
+  const nextSnapshot = createPosterSnapshot(nextState);
+  if (snapshotsEqual(previousSnapshot, nextSnapshot)) {
+    return nextState;
+  }
+
+  return {
+    ...nextState,
+    history: [...history, previousSnapshot].slice(-MAX_HISTORY_ENTRIES),
+    future: [],
+  };
+}
+
+function reducePosterAction(
   state: PosterState,
   action: PosterAction,
 ): PosterState {
@@ -445,6 +619,38 @@ export function posterReducer(
           ...state.exportSettings,
           ...action.settings,
         }),
+      };
+
+    case "APPLY_POSTER_SNAPSHOT":
+      return restorePosterSnapshot(state, action.snapshot);
+
+    case "ADD_SERIES_ITEM":
+      return {
+        ...state,
+        seriesItems: [
+          action.item,
+          ...(Array.isArray(state.seriesItems) ? state.seriesItems : []),
+        ].slice(0, 12),
+      };
+
+    case "REMOVE_SERIES_ITEM":
+      return {
+        ...state,
+        seriesItems: (Array.isArray(state.seriesItems) ? state.seriesItems : []).filter(
+          (item) => item.id !== action.itemId,
+        ),
+      };
+
+    case "CLEAR_SERIES_ITEMS":
+      return {
+        ...state,
+        seriesItems: [],
+      };
+
+    case "SET_PREVIEW_MODE":
+      return {
+        ...state,
+        previewMode: action.mode,
       };
 
     default:

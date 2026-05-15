@@ -58,6 +58,7 @@ export default function PreviewPanel() {
     userLocation,
     isMarkerEditorActive,
     activeMarkerId,
+    previewMode,
   } = state;
   const hasVisibleMarkers = form.showMarkers && state.markers.length > 0;
   const {
@@ -407,7 +408,11 @@ export default function PreviewPanel() {
 
   return (
     <section className="preview-panel">
-      <div className="poster-viewport">
+      <div
+        className={`poster-viewport${
+          previewMode === "wall" ? " poster-viewport--wall" : ""
+        }`}
+      >
         {/* Desktop ghost layer: canvas clone of the main map at reduced opacity */}
         <div className="poster-ghost-layer" aria-hidden="true">
           <canvas
@@ -420,7 +425,9 @@ export default function PreviewPanel() {
         </div>
         <div
           ref={frameRef}
-          className="poster-frame"
+          className={`poster-frame${
+            previewMode === "wall" ? " poster-frame--mockup" : ""
+          }`}
           style={
             {
               "--poster-aspect": `${aspect}`,

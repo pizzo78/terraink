@@ -11,7 +11,7 @@ import MapSettingsSection from "@/features/map/ui/MapSettingsSection";
 import LayersSection from "@/features/map/ui/LayersSection";
 import MarkersSection from "@/features/markers/ui/MarkersSection";
 import TypographySection from "@/features/poster/ui/TypographySection";
-import PresetQuickBar from "@/features/presets/ui/PresetQuickBar";
+import StudioPanel from "@/features/studio/ui/StudioPanel";
 import {
   LocationIcon,
   ThemeIcon,
@@ -51,7 +51,7 @@ const accordionSections: {
   { id: "layout", label: "Layout", Icon: LayoutIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
   { id: "markers", label: "Markers", Icon: MarkersIcon },
-  { id: "presets", label: "Presets", Icon: PresetsIcon },
+  { id: "presets", label: "Studio", Icon: PresetsIcon },
   { id: "style", label: "Style", Icon: StyleIcon },
 ];
 
@@ -279,7 +279,7 @@ export default function SettingsPanel({
           className={`accordion-body${openSections.has("presets") ? " is-open" : ""}`}
         >
           <div className="accordion-body-inner">
-            {!isAuxEditorActive ? <PresetQuickBar /> : null}
+            {!isAuxEditorActive ? <StudioPanel /> : null}
           </div>
         </div>
       </div>

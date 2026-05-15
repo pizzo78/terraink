@@ -243,6 +243,24 @@ export function useExport() {
     [exportPoster],
   );
 
+  const exportPosterPack = useCallback(async () => {
+    await exportPoster("pdf", {
+      dpi: 300,
+      marginMm: 0,
+      bleedMm: 3,
+      safeAreaMm: 5,
+      cropMarks: true,
+    });
+    await exportPoster("png", {
+      dpi: 150,
+      marginMm: 0,
+      bleedMm: 0,
+      safeAreaMm: 0,
+      cropMarks: false,
+    });
+    await exportPoster("svg");
+  }, [exportPoster]);
+
   return {
     isExporting: state.isExporting,
     exportSettings,
@@ -252,5 +270,6 @@ export function useExport() {
     handleDownloadPng,
     handleDownloadPdf,
     handleDownloadSvg,
+    exportPosterPack,
   };
 }

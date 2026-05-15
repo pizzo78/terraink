@@ -1327,6 +1327,13 @@
     background: #07131a;
   }
 
+  .poster-viewport.poster-viewport--wall {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(180deg, #162a32, #0b151a 58%, #081016 100%);
+    background-size: 48px 100%, 100% 100%;
+  }
+
   .poster-ghost-layer {
     display: block;
     position: absolute;
@@ -1361,6 +1368,14 @@
       0 12px 28px rgba(0, 0, 0, 0.45),
       0 4px 10px rgba(0, 0, 0, 0.32);
     margin-bottom: 56px;
+  }
+
+  .poster-frame.poster-frame--mockup {
+    border: 8px solid #edf2ef;
+    box-shadow:
+      0 24px 44px rgba(0, 0, 0, 0.54),
+      0 8px 14px rgba(0, 0, 0, 0.34),
+      0 0 0 1px rgba(7, 17, 21, 0.38);
   }
 
   .poster-frame .map-controls {
